@@ -10,13 +10,23 @@ import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.permission.PermissionType;
+import org.javacord.api.entity.permission.Permissions;
+import org.javacord.api.entity.permission.PermissionsBuilder;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.*;
 
 import java.awt.*;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.NoSuchElementException;
+
+import static org.javacord.api.interaction.SlashCommandOption.createStringOption;
+import static org.javacord.api.interaction.SlashCommandOption.createSubcommand;
 
 public class MiatMain {
     static boolean debugmessagelog;
@@ -28,26 +38,31 @@ public class MiatMain {
         int startTime = (int) (System.currentTimeMillis() / 1000);
         User self = api.getYourself();
         String time = new Date().toString();
-        api.updateActivity(ActivityType.WATCHING,"Slash Commands");
+        Permissions admin = new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build();
 
-        //SlashCommand.with("ping", "Checks the functionality of this command").createGlobal(api).join();
-        //SlashCommand.with("uptime", "Gets the uptime of the bot.").createGlobal(api).join();
-        //SlashCommand.with("purge","Deletes the specified number of messages.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Messages", "Amount of messages to delete.", true))).createGlobal(api).join();
-        //SlashCommand.with("delete","Deletes the specified message by ID.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "MessageID", "MessageID of the message you want to delete.", true))).createGlobal(api).join();
+        api.updateActivity(ActivityType.WATCHING,"Miat 3.0 is real");
+
+        //SlashCommand.with("ping", "Check if the bot is up.").createGlobal(api).join();
+        //SlashCommand.with("uptime", "Get the uptime of the bot.").createGlobal(api).join();
+        //SlashCommand.with("purge","Delete the specified number of messages.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Messages", "Amount of messages to delete.", true))).createGlobal(api).join();
+        //SlashCommand.with("delete","Delete the specified message by ID.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "MessageID", "MessageID of the message you want to delete.", true))).createGlobal(api).join();
         //SlashCommand.with("pfp","Get the avatar of a member.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER, "User","The user's PFP you want.", false))).createGlobal(api).join();
         //SlashCommand.with("serverinfo","Get info about the server.").createGlobal(api).join();
         //SlashCommand.with("setlogchannel","Set the deleted message log channel.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.CHANNEL, "Channel", "The channel you want to log deleted messages to.", true))).createGlobal(api).join();
-
-        //SlashCommand.with("future", "Future Config.").createGlobal(api).join();
+        //SlashCommand.with("ban","Ban the specified user.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER,"User", "The user to ban.",true))).createGlobal(api).join();
+        //SlashCommand.with("kick","Kick the specified user.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER,"User","User to kick.", true))).createGlobal(api).join();
+        //SlashCommand.with("miathelp","Show help for the selected category.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND, "fun","Shows a list of fun commands.", false), SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND,"utility","Shows a list of utility commands.", false))).createGlobal(api).join();
+        //SlashCommand.with("invite","Get an invite link for this bot with permissions needed to function.").createGlobal(api).join();
 
         //SlashCommand.with("wiki","Get a random Wikipedia article.").createGlobal(api).join();
-        //SlashCommand.with("pointcheck","Check your V0Xpoints.").createGlobal(api).join();
-        //SlashCommand.with("inspiro","Gets an \"inspirational\" post").createGlobal(api).join();
-        //SlashCommand.with("randfr","Gets a random Kemono Friends character article from Japari Library.").createGlobal(api).join();
-        //SlashCommand.with("godsays","Gets the latest word from god, courtesy of Terry A. Davis.").createGlobal(api).join();
-        //SlashCommand.with("miat","Gets an image of a Miat(a).").createGlobal(api).join();
+        //SlashCommand.with("pointcheck","Check your V0Xpoints, the top overall, or another user's points.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER, "user", "User to check. (Use <@ (userID) > to check across servers).",false), SlashCommandOption.create(SlashCommandOptionType.BOOLEAN,"top","See the top 5 earners."))).createGlobal(api).join();
+        //SlashCommand.with("inspiro","Get an \"inspirational\" post").createGlobal(api).join();
+        //SlashCommand.with("randfr","Get a random Kemono Friends character article from Japari Library.").createGlobal(api).join();
+        //SlashCommand.with("godsays","Get the latest word from god, courtesy of Terry A. Davis.").createGlobal(api).join();
+        //SlashCommand.with("miat","Get an image of a Miat(a).").createGlobal(api).join();
+
         /*
-        String slashCommandID = "1092253336855646278";
+        String slashCommandID = "1096965670819864746";
             try {
                 api.getGlobalSlashCommandById(Long.parseLong(slashCommandID)).get().delete();
             } catch (InterruptedException e) {
@@ -59,8 +74,8 @@ public class MiatMain {
 
         //slash commands
         api.addSlashCommandCreateListener(event -> {
-
             SlashCommandInteraction interaction = event.getSlashCommandInteraction();
+
             if (interaction.getCommandName().equals("ping")) {
                 interaction.createImmediateResponder().setContent("Pong. Plain and simple.").setFlags(MessageFlag.EPHEMERAL).respond();
             }
@@ -89,8 +104,34 @@ public class MiatMain {
                 interaction.createImmediateResponder().setContent(SetLogChannel.setlogchannel(interaction)).respond();
             }
 
+            if (interaction.getCommandName().equals("ban")) {
+                interaction.createImmediateResponder().setContent(Ban.ban(interaction)).setFlags(MessageFlag.EPHEMERAL).respond();
+            }
+
+            if (interaction.getCommandName().equals("kick")) {
+                interaction.createImmediateResponder().setContent(Kick.kick(interaction)).setFlags(MessageFlag.EPHEMERAL).respond();
+            }
+
+            if (interaction.getCommandName().equals("miathelp")) {
+                interaction.createImmediateResponder().setContent("").addEmbed(Help.help(interaction)).respond();
+            }
+
+            if (interaction.getCommandName().equals("invite")) {
+                interaction.createImmediateResponder().setContent(api.createBotInvite(admin)).setFlags(MessageFlag.EPHEMERAL).respond();
+            }
+
+            //fun commands below
+
             if (interaction.getCommandName().equals("pointcheck")) {
-                V0XpointChecker.pointCheck(interaction);
+                if (interaction.getArgumentUserValueByIndex(0).isPresent()) {
+                    V0XpointChecker.user(interaction);
+                }
+                if (interaction.getArgumentBooleanValueByIndex(0).isPresent()) {
+                    V0XpointChecker.top(interaction);
+                }
+                if (!interaction.getOptionByIndex(0).isPresent()) {
+                    V0XpointChecker.pointCheck(interaction);
+                }
             }
 
             if (interaction.getCommandName().equals("wiki")) {
@@ -122,20 +163,17 @@ public class MiatMain {
                     interactionOriginalResponseUpdater.setContent(Godsays.godSays()).update();
                 });
             }
-
-            if (interaction.getCommandName().equals("future")) {
-                interaction.createImmediateResponder().setContent("future config placeholder").setFlags(MessageFlag.EPHEMERAL).respond();
-            }
         });
 
         //legacy commands and V0Xpoints
+
         api.addMessageCreateListener(mc -> {
             String m = mc.getMessageContent();
-
             String author = mc.getMessageAuthor().toString();
             String server = mc.getServer().get().toString();
+
             if (debugmessagelog) {
-                if (!mc.getMessageAuthor().equals(self)) {
+                if (!mc.getMessageAuthor().equals(self) && !mc.getMessageAuthor().toString().equals("MessageAuthor (id: 919786500890173441, name: Miat Bot)")) {
                     try {
                         Webhook.send(ReadFirstLine.read("ServerFiles/webhookURL.txt"), "'" + m + "'\n\n- " + author + "\n- At " + time + " \n- " + server);
                     } catch (IOException e1) {
@@ -143,7 +181,9 @@ public class MiatMain {
                     }
                 }
             }
-            System.out.println(m);
+            if (m.startsWith("[")) {
+                System.out.println(m);
+            }
 
             if (m.startsWith("[randfr")) {
                 mc.getMessage().reply(RandFr.randomFriend());
@@ -158,10 +198,22 @@ public class MiatMain {
             } else
 
             if (m.startsWith("[miat")) {
-                mc.getMessage().reply("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 13) + ".png?raw=true");
+                mc.getMessage().reply("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 17) + ".png?raw=true");
             } else
 
-            if (m.toLowerCase().startsWith(".bestclient") || m.toLowerCase().startsWith("[bestclient") || m.toLowerCase().startsWith("!bestclient")) {
+            if (m.startsWith("[base64")) {
+                mc.getMessage().reply(Vase64.vase64(m));
+            }
+
+            if (m.startsWith("[help")) {
+                mc.getMessage().reply("Help is in the ``/miathelp`` slash command now!");
+            }
+
+            if (m.startsWith("[activity")) {
+                mc.getMessage().reply(SetActivity.setactivity(m,mc,api));
+            }
+
+            if (m.toLowerCase().startsWith("[bestclient")) {
                 Color seppuku = new Color(153,0,238);
                 EmbedBuilder e = new EmbedBuilder()
                         .setTitle("Seppuku")
@@ -205,8 +257,8 @@ public class MiatMain {
                 }
             } else
 
-            if (m.toLowerCase().contains("nigg")) {
-                mc.getChannel().sendMessage("__**come on get something original**__");
+            if (m.toLowerCase().contains("nigg") || m.toLowerCase().contains("n1gg") || m.toLowerCase().contains("kotlin user")) {
+                mc.getChannel().sendMessage("__**Racial slurs are discouraged!**__");
             } else
 
             if (m.contains("HAV0X")) {
@@ -229,7 +281,7 @@ public class MiatMain {
                 V0Xpoints.hV0Xpoints(mc, api, up);
             } else
 
-            if (m.toLowerCase().contains("havox")) {
+            if (m.toLowerCase().contains("havox") || m.toLowerCase().contains("habox") || m.toLowerCase().contains("havowox") || m.toLowerCase().contains("have cocks")) {
                 int down = -1;
                 V0Xpoints.hV0Xpoints(mc, api, down);
             } else
@@ -248,15 +300,37 @@ public class MiatMain {
 
         //deleted message logger
         api.addMessageDeleteListener(md -> {
-           if (!md.getMessageAuthor().get().getIdAsString().equals(self)) {
-               Channel logChannel = md.getServer().get().getChannelById(DeletedMessageLogChannel.channelRetriever(md.getServer().get().getIdAsString())).get();
+            try {
+                if (!md.getMessageAuthor().get().getIdAsString().equals(self)) {
+                   Channel logChannel = md.getServer().get().getChannelById(DeletedMessageLogChannel.channelRetriever(md.getServer().get().getIdAsString())).get();
 
-               EmbedBuilder e = new EmbedBuilder();
-               e.setAuthor(md.getMessageAuthor().get().asUser().get());
-               e.setColor(Color.orange);
-               e.addField("\u200b","'" + md.getMessageContent().get() + "' \n\n - " + time + "\n" + "Deleted in : " + md.getChannel().toString());
-               logChannel.asServerTextChannel().get().sendMessage(e);
-           }
+                   EmbedBuilder e = new EmbedBuilder();
+                   e.setAuthor(md.getMessageAuthor().get().asUser().get());
+                   e.setColor(Color.orange);
+                   e.addField("\u200b", "'" + md.getMessageContent().get() + "' \n\n - " + time + "\n" + "Deleted in : " + md.getChannel().toString());
+                   logChannel.asServerTextChannel().get().sendMessage(e);
+                }
+            } catch (NoSuchElementException nse) {
+                return;
+            }
+        });
+
+        api.addServerJoinListener(botJoin -> {
+           String serverID = botJoin.getServer().getIdAsString();
+            try {
+                FileWriter fw = new FileWriter("ServerFiles/" + serverID + ".txt");
+                fw.write("");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            User me = api.getYourself();
+            EmbedBuilder join = new EmbedBuilder();
+            join.setAuthor(me);
+            join.setTitle("Hello, Miat Fren is here!");
+            join.setThumbnail("https://cdn.discordapp.com/attachments/919786447488290816/920839787789836288/miat.jpeg");
+            join.addField("Information :", "Slash Commands are supported! \nPrefix : ``[``\nCreator : ``HAV0X#1009`` & ``arsonfrog#9475``");
+            join.addField("Get Started :", "Help : ``/miathelp``\nSet Deleted Message Log Channel : ``/setlogchannel``");
+            botJoin.getServer().getSystemChannel().get().sendMessage(join);
         });
     }
 }
