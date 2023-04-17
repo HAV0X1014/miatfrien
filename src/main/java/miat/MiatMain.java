@@ -209,7 +209,7 @@ public class MiatMain {
                 mc.getMessage().reply("Help is in the ``/miathelp`` slash command now!");
             }
 
-            if (m.startsWith("[activity")) {
+            if (m.startsWith("[setactivity")) {
                 mc.getMessage().reply(SetActivity.setactivity(m,mc,api));
             }
 
