@@ -1,0 +1,2 @@
+
+//put your YouChat API key here - get it from api.betterapi.net
