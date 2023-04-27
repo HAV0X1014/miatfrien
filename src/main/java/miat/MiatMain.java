@@ -40,7 +40,7 @@ public class MiatMain {
         String time = new Date().toString();
         Permissions admin = new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build();
 
-        api.updateActivity(ActivityType.WATCHING,"Miat 3.0 is real");
+        api.updateActivity(ActivityType.PLAYING,"Miat has AI!! Use /youchat");
 
         //SlashCommand.with("ping", "Check if the bot is up.").createGlobal(api).join();
         //SlashCommand.with("uptime", "Get the uptime of the bot.").createGlobal(api).join();
@@ -60,6 +60,7 @@ public class MiatMain {
         //SlashCommand.with("randfr","Get a random Kemono Friends character article from Japari Library.").createGlobal(api).join();
         //SlashCommand.with("godsays","Get the latest word from god, courtesy of Terry A. Davis.").createGlobal(api).join();
         //SlashCommand.with("miat","Get an image of a Miat(a).").createGlobal(api).join();
+        //SlashCommand.with("youchat","Ask you.com/chat (YouChat) a question.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Prompt", "The prompt you wish to ask YouChat.",true))).createGlobal(api).join();
 
         /*
         String slashCommandID = "1096965670819864746";
@@ -163,6 +164,12 @@ public class MiatMain {
                     interactionOriginalResponseUpdater.setContent(Godsays.godSays()).update();
                 });
             }
+
+            if (interaction.getCommandName().equals("youchat")) {
+                interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                    interactionOriginalResponseUpdater.setContent("").addEmbed(YouChat.youChat(interaction.getArgumentStringValueByIndex(0).get())).update();
+                });
+            }
         });
 
         //legacy commands and V0Xpoints
@@ -185,32 +192,54 @@ public class MiatMain {
                 System.out.println(m);
             }
 
-            if (m.startsWith("[randfr")) {
+            if (m.toLowerCase().startsWith("[randfr")) {
                 mc.getMessage().reply(RandFr.randomFriend());
             } else
 
-            if (m.startsWith("[inspiro")) {
+            if (m.toLowerCase().startsWith("[inspiro")) {
                 mc.getMessage().reply(Inspiro.inspiro());
             } else
 
-            if (m.startsWith("[godsays")) {
+            if (m.toLowerCase().startsWith("[godsays")) {
                 mc.getMessage().reply(Godsays.godSays());
             } else
 
-            if (m.startsWith("[miat")) {
+            if (m.toLowerCase().startsWith("[miat")) {
                 mc.getMessage().reply("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 17) + ".png?raw=true");
             } else
 
-            if (m.startsWith("[base64")) {
+            if (m.toLowerCase().startsWith("[base64")) {
                 mc.getMessage().reply(Vase64.vase64(m));
             }
 
-            if (m.startsWith("[help")) {
+            if (m.toLowerCase().startsWith("[help")) {
                 mc.getMessage().reply("Help is in the ``/miathelp`` slash command now!");
             }
 
-            if (m.startsWith("[setactivity")) {
+            if (m.toLowerCase().startsWith("[setactivity")) {
                 mc.getMessage().reply(SetActivity.setactivity(m,mc,api));
+            }
+
+            if (m.toLowerCase().startsWith("[yc") || m.toLowerCase().startsWith("[youchat")) {
+                String prompt = m.replace("[yc ", "");
+                mc.addReactionsToMessage("\uD83D\uDCE8");
+                Thread youThread = new Thread(new Runnable() {
+                  public void run() {
+                      mc.getMessage().reply(YouChat.youChat(prompt));
+                      mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDCE8");
+                }});
+                youThread.start();
+            }
+
+            if (m.toLowerCase().startsWith("[askserval")) {
+                String prompt = m.toLowerCase().replace("[askserval ", "");
+                mc.addReactionsToMessage("\uD83D\uDC31");
+                Thread youKemoThread = new Thread(new Runnable() {
+                    public void run() {
+                        mc.getMessage().reply(KemoYou.askServal(prompt));
+                        mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDC31");
+                    }});
+                youKemoThread.start();
             }
 
             if (m.toLowerCase().startsWith("[bestclient")) {
@@ -229,7 +258,7 @@ public class MiatMain {
                 mc.getMessage().reply(e);
             }
 
-            if (m.startsWith("!ml on")) {
+            if (m.toLowerCase().startsWith("!ml on")) {
                 String id = mc.getMessageAuthor().getIdAsString();
                 try {
                     if (Whitelist.whitelisted(id)) {
@@ -243,7 +272,7 @@ public class MiatMain {
                 }
             } else
 
-            if (m.startsWith("!ml off")) {
+            if (m.toLowerCase().startsWith("!ml off")) {
                 String id = mc.getMessageAuthor().getIdAsString();
                 try {
                     if (Whitelist.whitelisted(id)) {
@@ -281,12 +310,7 @@ public class MiatMain {
                 V0Xpoints.hV0Xpoints(mc, api, up);
             } else
 
-            if (m.toLowerCase().contains("havox") || m.toLowerCase().contains("habox") || m.toLowerCase().contains("havowox") || m.toLowerCase().contains("have cocks")) {
-                int down = -1;
-                V0Xpoints.hV0Xpoints(mc, api, down);
-            } else
-
-            if (m.contains("havix")) {
+            if (m.toLowerCase().contains("havox") || m.toLowerCase().contains("habox") || m.toLowerCase().contains("havowox") || m.toLowerCase().contains("have cocks") || m.toLowerCase().contains("havix")) {
                 int down = -1;
                 V0Xpoints.hV0Xpoints(mc, api, down);
             } else

@@ -1,9 +1,12 @@
 package miat.UtilityCommands;
 
 import miat.FileHandlers.CheckPermission;
+import miat.FileHandlers.Whitelist;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SlashCommandInteraction;
+
+import java.io.FileNotFoundException;
 
 public class Kick {
     public static String kick(SlashCommandInteraction interaction) {
@@ -12,6 +15,13 @@ public class Kick {
         String replyContent;
 
         if (CheckPermission.checkPermission(interaction, PermissionType.KICK_MEMBERS)) {
+            try {
+                if (Whitelist.whitelisted(user2kick.getIdAsString())) {
+                    replyContent = "Failed to ban user " + username2kick + ".";
+                }
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             interaction.getServer().get().kickUser(user2kick);
             replyContent = "Kicked user " + username2kick + ".";
         }

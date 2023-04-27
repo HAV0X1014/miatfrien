@@ -19,8 +19,10 @@ public class Help {
                 "\n\n``inspiro``: Get an \"inspirational\" image." +
                 "\n\n``randfr``: Get a random Kemono Friends character article." +
                 "\n\n``godsays``: Get the latest word from God, courtesy of Terry A. Davis." +
+                "\n\n``youchat``: Use YouChat to answer a question. (Powered by YouChat and betterAPI.)" +
                 "\n\n``miat``: run it and figure it out");
                 e.addField("__**Legacy Commands**__","``[base64 [encode|decode] [text]``: Encodes or Decodes the supplied text." +
+                "\n\n``[askserval``: Ask Serval from Kemono Friends a question. (Powered by YouChat and betterAPI.)" +
                 "\n\n``[bestclient``: Informs you about the best client.");
                 e.addField("Created By :", "``HAV0X#1009`` & ``arsonfrog#9475``");
                 e.setColor(Color.orange);
