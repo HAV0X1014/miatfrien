@@ -1,69 +1,55 @@
 package miat.FunFeatures;
 
 import miat.FileHandlers.ReadFirstLine;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.awt.*;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 public class YouChat {
-    private static HttpURLConnection conn;
-    public static EmbedBuilder youChat(String prompt) {
-        String line;
-        StringBuffer responseContent = new StringBuffer();
-        BufferedReader reader;
-        String response = null;
+    public static void youChat(String prompt, MessageCreateEvent mc) {
+        OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(30,TimeUnit.SECONDS).build();
+
+        String messageID = mc.getMessage().getIdAsString();
+        ServerTextChannel channel = mc.getMessage().getServerTextChannel().get();
         EmbedBuilder e = new EmbedBuilder();
-
+        URL url = null;
         try {
-            URL url = new URL("https://api.betterapi.net/youdotcom/chat?message=" + prompt + "&key=" + ReadFirstLine.read("ServerFiles/apiKey.txt"));
-            conn = (HttpURLConnection) url.openConnection();
+            url = new URL("https://api.betterapi.net/youchat?inputs=" + prompt + "&key=" + ReadFirstLine.read("ServerFiles/apiKey.txt"));
+            Request request = new Request.Builder().url(url).build();
 
-            conn.setRequestMethod("GET");
-            conn.setConnectTimeout(15000);
-            conn.setReadTimeout(15000);
-
-            int status = conn.getResponseCode();
-
-            if (status > 299) {
-                e.setTitle("YouChat AI response");
-                e.setAuthor("YouChat","https://you.com/chat","https://cdn.discordapp.com/attachments/1100888255483875428/1100888270923120782/you_logo.png");
-                e.addField("Response Content","Failed to get a response from the API (malformed or unavailable - HTTP 299)");
-                e.setColor(Color.cyan);
-            } else {
-                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-                while((line = reader.readLine()) != null) {
-                    responseContent.append(line);
-                }
-                reader.close();
-
-                response = responseContent.toString();
-                response = response.replaceAll(".\"message\":\"","");
-                response = response.replaceAll("\",\"time\":.*","");
-                response = response.replaceAll("\\\\n\\\\n","\n\n");
-                response = response.replaceAll("\\\\n","\n");
-
-                e.setTitle("YouChat AI response");
-                e.setAuthor("YouChat","https://you.com/chat","https://cdn.discordapp.com/attachments/1100888255483875428/1100888270923120782/you_logo.png");
-                e.addField("Response Content",response);
-                e.setColor(Color.cyan);
+            String responseContent;
+            try (Response resp = client.newCall(request).execute()) {
+                responseContent = resp.body().string();
             }
-            return e;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } finally {
-            conn.disconnect();
-        }
-        e.setTitle("YouChat AI response");
-        e.setAuthor("YouChat","https://you.com/chat","https://cdn.discordapp.com/attachments/1100888255483875428/1100888270923120782/you_logo.png");
-        e.addField("Response Content","Failed to get a response from the API (timed out)");
-        e.setColor(Color.cyan);
 
-        return e;
+            String response = responseContent;
+            response = response.replaceAll(".*\"generated_text\":\"", "");
+            response = response.replaceAll("\",\"time\":.*", "");
+            response = response.replaceAll("\\\\n\\\\n", "\n\n");
+            response = response.replaceAll("\\\\n", "\n");
+
+            if (response == null) {
+                System.out.println("Something is wrong - YouChat");
+            }
+
+            e.setAuthor("YouChat","https://you.com/chat","https://cdn.discordapp.com/attachments/1100888255483875428/1100888270923120782/you_logo.png");
+            e.setDescription(response);
+            e.setColor(Color.cyan);
+
+            channel.getMessageById(messageID).thenAccept(message -> {
+                message.reply(e);
+            });
+
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

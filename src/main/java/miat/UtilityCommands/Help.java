@@ -14,15 +14,17 @@ public class Help {
         switch (page) {
             case "miathelp fun":
                 e.setTitle("Fun Features");
-                e.addField("__**Slash Commands**__", "``wiki``: Get a random Wikipedia article." +
+                e.addField("__**Slash Commands**__", "\n``wiki``: Get a random Wikipedia article." +
                 "\n\n``pointcheck``: Check your own balance of V0Xpoints, the top 5 earners, or another user's balance. Increase your score by saying specific phrases." +
                 "\n\n``inspiro``: Get an \"inspirational\" image." +
                 "\n\n``randfr``: Get a random Kemono Friends character article." +
                 "\n\n``godsays``: Get the latest word from God, courtesy of Terry A. Davis." +
-                "\n\n``youchat``: Use YouChat to answer a question. (Powered by YouChat and betterAPI.)" +
                 "\n\n``miat``: run it and figure it out");
-                e.addField("__**Legacy Commands**__","``[base64 [encode|decode] [text]``: Encodes or Decodes the supplied text." +
-                "\n\n``[askserval``: Ask Serval from Kemono Friends a question. (Powered by YouChat and betterAPI.)" +
+                e.addField("__**Legacy Commands**__","\n``[base64 [encode|decode] [text]``: Encodes or Decodes the supplied text." +
+                "\n\n``[yc``: Ask You.com's chat AI a question. (Powered by YouChat and betterAPI.)" +
+                "\n\n``[serval``: Ask Serval from Kemono Friends a question. (Powered by YouChat and betterAPI.)" +
+                "\n\n``[blackbuck``: Ask Blackbuck from Kemono Friends a question. (Powered by YouChat and betterAPI.)" +
+                "\n\n``[topi``: Ask Topi from Kemono Friends a question. (Powered by YouChat and betterAPI.)" +
                 "\n\n``[bestclient``: Informs you about the best client.");
                 e.addField("Created By :", "``HAV0X#1009`` & ``arsonfrog#9475``");
                 e.setColor(Color.orange);
@@ -30,7 +32,8 @@ public class Help {
 
             case "miathelp utility":
                 e.setTitle("Utility Features");
-                e.addField("__**Slash Commands**__","``ping``: Check if the bot is online or not." +
+                e.addField("__**Slash Commands**__","\n_Some utility commands are able to be run by Debug whitelisted users._" +
+                "\n\n``ping``: Check if the bot is online or not." +
                 "\n\n``uptime``: Check the uptime of the bot." +
                 "\n\n``purge``: Purge the desired amount of messages." +
                 "\n\n``delete``: Delete the specified message - both message ID types work." +
@@ -41,7 +44,7 @@ public class Help {
                 "\n\n``kick``: Kick the specified user." +
                 "\n\n``miathelp``: Get help with the bot." +
                 "\n\n``invite`` : Get an invite for the bot with all permissions needed.");
-                e.addField("__**Legacy Commands**__", "``!ml [on|off]``: Enable or Disable the Debug Message Log. Default off.");
+                e.addField("__**Legacy Commands**__", "``[ml [on|off]``: Enable or Disable the Debug Message Log. Default off.");
                 e.addField("Created By :", "``HAV0X#1009`` & ``arsonfrog#9475``");
                 e.setColor(seppuku);
                 break;
