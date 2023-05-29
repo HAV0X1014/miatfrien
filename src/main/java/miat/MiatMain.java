@@ -20,6 +20,7 @@ import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.NoSuchElementException;
 
@@ -35,7 +36,7 @@ public class MiatMain {
         String time = new Date().toString();
         Permissions admin = new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build();
 
-        api.updateActivity(ActivityType.PLAYING,"Miat has AI!! Use /youchat");
+        api.updateActivity(ActivityType.PLAYING,"Miat has AI and animal facts!");
 
         //SlashCommand.with("ping", "Check if the bot is up.").createGlobal(api).join();
         //SlashCommand.with("uptime", "Get the uptime of the bot.").createGlobal(api).join();
@@ -57,6 +58,8 @@ public class MiatMain {
         //SlashCommand.with("miat","Get an image of a Miat(a).").createGlobal(api).join();
         //SlashCommand.with("youchat","Ask you.com/chat (YouChat) a question.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Prompt", "The prompt you wish to ask YouChat.",true))).createGlobal(api).join();
         //SlashCommand.with("animalfact","Get a random animal fact.").createGlobal(api).join();
+        //SlashCommand.with("joke","Get a random joke from jokeapi.dev.").createGlobal(api).join();
+        //SlashCommand.with("createqr","Create a QR code with goqr.me.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING,"Data","Data to encode into the QR code.", true))).createGlobal(api).join();
 
         /*
         String slashCommandID = "1100917267182669944";
@@ -164,6 +167,19 @@ public class MiatMain {
             if (interaction.getCommandName().equals("animalfact")) {
                 interaction.createImmediateResponder().setContent("").addEmbed(AnimalFact.animalFact()).respond();
             }
+
+            if (interaction.getCommandName().equals("joke")) {
+                interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                    interactionOriginalResponseUpdater.setContent("").addEmbed(RandomJoke.randomJoke()).update();
+                });
+            }
+
+            if (interaction.getCommandName().equals("createqr")) {
+                String data = interaction.getArgumentStringValueByIndex(0).get();
+                interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                    interactionOriginalResponseUpdater.setContent("").addEmbed(QRCodeCreate.qrCodeCreate(data)).update();
+                });
+            }
         });
 
         //legacy commands and V0Xpoints
@@ -204,60 +220,102 @@ public class MiatMain {
 
             if (m.toLowerCase().startsWith("[base64")) {
                 mc.getMessage().reply(Vase64.vase64(m));
-            }
+            } else
 
             if (m.toLowerCase().startsWith("[help")) {
                 mc.getMessage().reply("Help is in the ``/miathelp`` slash command now!");
-            }
+            } else
 
             if (m.toLowerCase().startsWith("[setactivity")) {
                 mc.getMessage().reply(SetActivity.setactivity(m,mc,api));
-            }
+            } else
+
+            if (m.toLowerCase().startsWith("[animalfact")) {
+                mc.getMessage().reply(AnimalFact.animalFact());
+            } else
+
+            if (m.toLowerCase().startsWith("[wiki")) {
+                mc.getMessage().reply(Wikipedia.randomArticle());
+            } else
+
+            if (m.toLowerCase().startsWith("[uptime")) {
+                mc.getMessage().reply(Uptime.uptime(startTime));
+            } else
+
+            if (m.toLowerCase().startsWith("[joke")) {
+                mc.getMessage().reply(RandomJoke.randomJoke());
+            } else
+
+            if (m.toLowerCase().startsWith("[qr")) {
+                String data = m.replace("[qr ","");
+                mc.getMessage().reply(QRCodeCreate.qrCodeCreate(data));
+            } else
 
             if (m.toLowerCase().startsWith("[yc")) {
                 String prompt = m.replace("[yc ", "");
                 mc.addReactionsToMessage("\uD83D\uDCE8");
 
-                Thread youThread = new Thread(new Runnable() {
-                    public void run() {
-                        YouChat.youChat(prompt, mc);
-                        mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDCE8");
-                    }});
+                Thread youThread = new Thread(() -> {
+                    YouChat.youChat(prompt,mc);
+                    mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDCE8");
+                });
                 youThread.start();
-            }
+            } else
 
             if (m.toLowerCase().startsWith("[topi")) {
                 String prompt = m.toLowerCase().replace("[topi ", "");
                 mc.addReactionsToMessage("\uD83C\uDFDE️");
 
                 Thread kemoThread = new Thread(() -> {
-                    KemoYou.kemoYou("Topi", prompt, mc);
+                    KemoYou.kemoYou("Topi",prompt,mc);
                     mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
                 });
                 kemoThread.start();
-            }
+            } else
 
             if (m.toLowerCase().startsWith("[serval")) {
                 String prompt = m.toLowerCase().replace("[serval ", "");
                 mc.addReactionsToMessage("\uD83C\uDFDE️");
 
                 Thread kemoThread = new Thread(() -> {
-                    KemoYou.kemoYou("Serval", prompt, mc);
+                    KemoYou.kemoYou("Serval",prompt,mc);
                     mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
                 });
                 kemoThread.start();
-            }
+            } else
 
             if (m.toLowerCase().startsWith("[blackbuck")) {
                 String prompt = m.toLowerCase().replace("[blackbuck ", "");
                 mc.addReactionsToMessage("\uD83C\uDFDE️");
 
                 Thread kemoThread = new Thread(() -> {
-                    KemoYou.kemoYou("Blackbuck", prompt, mc);
+                    KemoYou.kemoYou("Blackbuck",prompt,mc);
                     mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
                 });
                 kemoThread.start();
-            }
+            } else
+
+            if (m.toLowerCase().startsWith("[wolverine")) {
+                String prompt = m.toLowerCase().replace("[wolverine ", "");
+                mc.addReactionsToMessage("\uD83C\uDFDE");
+
+                Thread kemoThread = new Thread(() -> {
+                    KemoYou.kemoYou("Wolverine",prompt,mc);
+                    mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                });
+                kemoThread.start();
+            } else
+
+            if (m.toLowerCase().startsWith("[silverfox")) {
+                String prompt = m.toLowerCase().replace("[silverfox ", "");
+                mc.addReactionsToMessage("\uD83C\uDFDE");
+
+                Thread kemoThread = new Thread(() -> {
+                    KemoYou.kemoYou("SilverFox",prompt,mc);
+                    mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                });
+                kemoThread.start();
+            } else
 
             if (m.toLowerCase().startsWith("[bestclient")) {
                 Color seppuku = new Color(153,0,238);
@@ -273,7 +331,7 @@ public class MiatMain {
                         .setImage("https://github.com/seppukudevelopment/seppuku/blob/master/res/seppuku_full.png?raw=true")
                         .setThumbnail("https://github.com/seppukudevelopment/seppuku/blob/master/src/main/resources/assets/seppukumod/textures/seppuku-logo.png?raw=true");
                 mc.getMessage().reply(e);
-            }
+            } else
 
             if (m.toLowerCase().startsWith("[ml on")) {
                 String id = mc.getMessageAuthor().getIdAsString();
@@ -335,7 +393,10 @@ public class MiatMain {
             if (m.toLowerCase().contains("i like kotlin")) {
                 int down = -1;
                 V0Xpoints.hV0Xpoints(mc, api, down);
+            } else
 
+            if (m.startsWith("[")) {
+                mc.getChannel().sendMessage("Unknown command. Use ``/miathelp`` for a list of commands.");
             }
         });
 

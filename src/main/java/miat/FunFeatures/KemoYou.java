@@ -36,6 +36,8 @@ public class KemoYou {
             response = response.replaceAll("\",\"time\":.*", "");
             response = response.replaceAll("\\\\n\\\\n", "\n\n");
             response = response.replaceAll("\\\\n", "\n");
+            response = response.replaceAll("&lt;","<");
+            response = response.replaceAll("&gt;",">");
 
             if (response == null) {
                 System.out.println("Something is wrong - KemoYou");

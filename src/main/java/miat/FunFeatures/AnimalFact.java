@@ -9,7 +9,7 @@ public class AnimalFact {
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Random Animal Fact");
         e.setAuthor("Facts from factretriever.com","https://www.factretriever.com/animal-facts","https://cdn.discordapp.com/attachments/1100888255483875428/1106945626761076777/image.png");
-        e.addField("", fact);
+        e.setDescription(fact);
 
         return e;
     }
