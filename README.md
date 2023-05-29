@@ -3,6 +3,9 @@ Miat Fren Discord bot, written in Java with Javacord.
 
 A general purpose discord bot with a focus on fun!
 
+If you would like to see miat in action, it is available in this server.
+https://discord.gg/dHNund6jey
+
 ### Features
 - `animalfact`: Get a random Animal Fact from factretriever.com.
 - `createqr`: Create a QR code with any string.
