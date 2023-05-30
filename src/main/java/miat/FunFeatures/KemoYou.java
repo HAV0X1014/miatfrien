@@ -22,6 +22,7 @@ public class KemoYou {
         ServerTextChannel channel = mc.getMessage().getServerTextChannel().get();
         EmbedBuilder e = new EmbedBuilder();
         URL url = null;
+        int code;
         try {
             url = new URL("https://api.betterapi.net/youchat?inputs=" + ReadFull.read("ServerFiles/KemoYouPrompts/" + character + ".txt") + prompt + "&key=" + ReadFirstLine.read("ServerFiles/apiKey.txt"));
             Request request = new Request.Builder().url(url).build();
@@ -29,6 +30,7 @@ public class KemoYou {
             String responseContent;
             try (Response resp = client.newCall(request).execute()) {
                 responseContent = resp.body().string();
+                code = resp.code();
             }
 
             String response = responseContent;
@@ -41,6 +43,10 @@ public class KemoYou {
 
             if (response == null) {
                 System.out.println("Something is wrong - KemoYou");
+            }
+
+            if (code > 200 || code < 300) {
+                response = "There has been an error between the API and the bot.\n\nHTTP status code ``" + code + "``.";
             }
 
             e.setAuthor(character + ".", "https://you.com/chat", "https://cdn.discordapp.com/attachments/1100888255483875428/1106987473785065492/Daco_1827122.png");

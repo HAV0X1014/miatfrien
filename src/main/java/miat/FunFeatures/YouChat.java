@@ -21,6 +21,7 @@ public class YouChat {
         ServerTextChannel channel = mc.getMessage().getServerTextChannel().get();
         EmbedBuilder e = new EmbedBuilder();
         URL url = null;
+        int code;
         try {
             url = new URL("https://api.betterapi.net/youchat?inputs=" + prompt + "&key=" + ReadFirstLine.read("ServerFiles/apiKey.txt"));
             Request request = new Request.Builder().url(url).build();
@@ -28,6 +29,7 @@ public class YouChat {
             String responseContent;
             try (Response resp = client.newCall(request).execute()) {
                 responseContent = resp.body().string();
+                code = resp.code();
             }
 
             String response = responseContent;
@@ -40,6 +42,10 @@ public class YouChat {
 
             if (response == null) {
                 System.out.println("Something is wrong - YouChat");
+            }
+
+            if (code > 200 || code < 300) {
+                response = "There has been an error between the API and the bot.\n\nHTTP status code ``" + code + "``.";
             }
 
             e.setAuthor("YouChat","https://you.com/chat","https://cdn.discordapp.com/attachments/1100888255483875428/1100888270923120782/you_logo.png");
