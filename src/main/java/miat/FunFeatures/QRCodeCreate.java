@@ -21,7 +21,7 @@ public class QRCodeCreate {
         BufferedImage qrcode;
         InputStream responseContent;
         try {
-            url = new URL("https://api.qrserver.com/v1/create-qr-code/?data=" + data + "&size=512x512");
+            url = new URL("https://api.qrserver.com/v1/create-qr-code/?data=" + data + "&size=512x512&qzone=1");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
