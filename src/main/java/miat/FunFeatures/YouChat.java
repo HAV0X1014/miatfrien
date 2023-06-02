@@ -44,7 +44,7 @@ public class YouChat {
                 System.out.println("Something is wrong - YouChat");
             }
 
-            if (code > 200 || code < 300) {
+            if (code < 199 || code > 300) {
                 response = "There has been an error between the API and the bot.\n\nHTTP status code ``" + code + "``.";
             }
 
