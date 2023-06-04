@@ -40,6 +40,14 @@ public class KemoYou {
             response = response.replaceAll("\\\\n", "\n");
             response = response.replaceAll("&lt;","<");
             response = response.replaceAll("&gt;",">");
+            response = response.replaceAll("&amp;","&");
+            response = response.replaceAll("&quot;","\"");
+            response = response.replaceAll("&apos;","\'");
+            response = response.replaceAll("&cent;","¢");
+            response = response.replaceAll("&pound;","£");
+            response = response.replaceAll("&yen;","¥");
+            response = response.replaceAll("&euro;","€");
+            response = response.replaceAll("&nbsp;"," ");
 
             if (response == null) {
                 System.out.println("Something is wrong - KemoYou");
