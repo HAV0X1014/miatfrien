@@ -8,7 +8,9 @@ import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.intent.Intent;
+import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageFlag;
+import org.javacord.api.entity.message.MessageReference;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Permissions;
@@ -20,9 +22,9 @@ import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 public class MiatMain {
     static boolean debugmessagelog;
@@ -243,7 +245,17 @@ public class MiatMain {
             } else
 
             if (m.toLowerCase().startsWith("[joke")) {
-                mc.getMessage().reply(RandomJoke.randomJoke());
+                Random random = new Random();
+                int randomNumber = random.nextInt(15);
+                if (randomNumber == 0 || randomNumber == 1) {
+                    mc.addReactionsToMessage("\uD83E\uDDBA");
+                    mc.addReactionsToMessage("\uD83D\uDEE0️");
+                    mc.addReactionsToMessage("\uD83D\uDEA7");
+                    mc.addReactionsToMessage("\uD83D\uDC77");
+                    mc.getMessage().reply("https://cdn.discordapp.com/attachments/1100888255483875428/1123410595333537943/under_construction.mp4");
+                } else {
+                    mc.getMessage().reply(RandomJoke.randomJoke());
+                }
             } else
 
             if (m.toLowerCase().startsWith("[qr")) {
@@ -317,6 +329,17 @@ public class MiatMain {
                 kemoThread.start();
             } else
 
+            if (m.toLowerCase().startsWith("[tact")) {
+                String prompt = m.toLowerCase().replace("[tact ","");
+                mc.addReactionsToMessage("\uD83D\uDE80");
+
+                Thread tactThread = new Thread(() -> {
+                    KemoYou.kemoYou("Tact",prompt,mc);
+                    mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
+                });
+                tactThread.start();
+            } else
+
             if (m.toLowerCase().startsWith("[bestclient")) {
                 Color seppuku = new Color(153,0,238);
                 EmbedBuilder e = new EmbedBuilder()
@@ -359,6 +382,38 @@ public class MiatMain {
                 } catch (FileNotFoundException e) {
                     throw new RuntimeException(e);
                 }
+            } else
+
+            if (m.toLowerCase().startsWith("[remove")){
+                String miatId = mc.getMessage().getMessageReference().get().getMessage().get().getAuthor().getIdAsString();
+                //gets the author id of the message that 'should' have the command response. This is the variable that stores the message that is requested to be deleted.
+
+                String commandIssuer = mc.getMessage().getMessageReference().get().getMessage().get().getReferencedMessage().get().getAuthor().getIdAsString();
+                //gets the author id of the command issuer. This is the variable that stores the author of the original command so only the author can delete their command response.
+
+                System.out.println(commandIssuer);
+                //dont knock it if it works
+                if (miatId.equals(self.getIdAsString()) && mc.getMessageAuthor().getIdAsString().equals(commandIssuer)) {
+                    DelOwn.delOwn(mc, api);
+                    mc.getMessage().delete();
+                } else {
+                    mc.getMessage().reply("You cannot delete others' messages using this command.");
+                }
+            } else
+
+            if (m.startsWith("[purge ")) {
+                String amt = m.replace("[purge ","");
+                mc.getMessage().reply(Purge.purge(mc, amt));
+                Thread removeNotice = new Thread(() -> {
+                    Message notif = mc.getChannel().getMessages(1).join().getNewestMessage().get();
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    notif.delete();
+                });
+                removeNotice.start();
             } else
 
             if (m.toLowerCase().contains("nigg") || m.toLowerCase().contains("n1gg") || m.toLowerCase().contains("kotlin user")) {

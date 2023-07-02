@@ -16,14 +16,14 @@ public class RandFr {
 
         String[] unwantedResult = new String[]{"Alisa_Southerncross" , "Aliyan", "Category:Real_Animal_Friends", "Category:Cryptid_Friends",
                 "Category:EX_Friends", "Category:Crossover_Friends", "Chestnut_Horse", "Chibi_Kumamon", "Coco", "Crunchyroll-Hime",
-                "Debiru-sama", "De_Brazza's_Monkey", "Dororo", "Draco_Centauros", "Elephant_(Beast_King)", "Gachapin", "Giraffe_(Beast_King)",
-                "Giroro", "Godzilla", "Gorilla_(Beast_King)", "HAW-206", "Hello_Kitty_Serval", "Hello_Mimmy_Serval",
-                "Hi-no-Tori", "Higejii", "Higumamon", "Hippopotamus_(Beast_King)", "Keroro", "Kururu", "Leo",
-                "Lion_(Beast_King)", "Logikoma", "Mongoose_(Beast_King)", "Mukku", "Old_World_Vulture_(Beast_King)",
-                "Ostrich_(Beast_King)", "Palcoarai-san", "Palcoarai-san2", "Rabbit_Yukine", "Seal_Brown_Horse",
+                "Debiru-sama", "De_Brazza's_Monkey", "Dororo", "Draco_Centauros", "Beast_King_Elephant", "Elephant_(Beast_King)", "Gachapin", "Giraffe_(Beast_King)",
+                "Beast_King_Giraffe", "Giroro", "Beast_King_Gorilla", "Gorilla_(Beast_King)", "HAW-206", "Hello_Kitty_Serval", "Hello_Mimmy_Serval",
+                "Hi-no-Tori", "Higejii", "Higumamon", "Beast_King_Hippopotamus", "Hippopotamus_(Beast_King)", "Keroro", "Kururu", "Leo",
+                "Beast_King_Lion", "Lion_(Beast_King)", "Logikoma", "Beast_King_Mongoose", "Mongoose_(Beast_King)", "Mukku", "Beast_King_Old_World_Vulture",
+                "Old_World_Vulture_(Beast_King)", "Beast_King_Ostrich", "Ostrich_(Beast_King)", "Palcoarai-san", "Palcoarai-san2", "Rabbit_Yukine", "Seal_Brown_Horse",
                 "Slow_Loris", "Tachikoma_Type-A", "Tachikoma_Type-B", "Tachikoma_Type-C", "Tachikoma_Type-H",
-                "Tachikoma_Type-S", "Tamama", "Tommy", "Uchikoma", "Unico", "Valcoara", "White_Horse",
-                "Wildebeest_(Beast_King)", "Witch", "Zebra_(Beast_King)"};
+                "Tachikoma_Type-S", "Tamama", "Tommy", "Uchikoma", "Unico", "Valcoara", "White_Horse", "Beast_King_Wildebeest",
+                "Wildebeest_(Beast_King)", "Witch", "Beast_King_Zebra", "Zebra_(Beast_King)"};
         String line;
         StringBuffer responseContent = new StringBuffer();
 
