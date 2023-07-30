@@ -1,5 +1,6 @@
 package miat;
 
+import me.bush.translator.Language;
 import miat.FileHandlers.*;
 import miat.FunFeatures.*;
 import miat.UtilityCommands.*;
@@ -7,16 +8,18 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.channel.Channel;
+import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageFlag;
-import org.javacord.api.entity.message.MessageReference;
+import org.javacord.api.entity.message.Reaction;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Permissions;
 import org.javacord.api.entity.permission.PermissionsBuilder;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.*;
+import org.javacord.api.listener.message.reaction.ReactionAddListener;
 
 import java.awt.*;
 import java.io.FileNotFoundException;
@@ -24,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Random;
 
 public class MiatMain {
@@ -31,7 +35,7 @@ public class MiatMain {
     static String token = MiatToken.read("ServerFiles/token.txt"); //replace token.txt with the filename of the txt with your token
 
     public static void main(String[] args) {
-        DiscordApi api = new DiscordApiBuilder().setToken(token).setIntents(Intent.MESSAGE_CONTENT, Intent.GUILD_MESSAGES).login().join();
+        DiscordApi api = new DiscordApiBuilder().setToken(token).setAllIntents().login().join();
         System.out.println("Miat logged in.");
         int startTime = (int) (System.currentTimeMillis() / 1000);
         User self = api.getYourself();
@@ -185,7 +189,6 @@ public class MiatMain {
         });
 
         //legacy commands and V0Xpoints
-
         api.addMessageCreateListener(mc -> {
             String m = mc.getMessageContent();
             String author = mc.getMessageAuthor().toString();
@@ -416,6 +419,11 @@ public class MiatMain {
                 removeNotice.start();
             } else
 
+            if (m.startsWith("[translate")) {
+                String textToTranslate = m.replace("[translate ", "");
+                mc.getMessage().reply(Trnsl.trnsl(textToTranslate, Language.ENGLISH));
+            } else
+
             if (m.toLowerCase().contains("nigg") || m.toLowerCase().contains("n1gg") || m.toLowerCase().contains("kotlin user")) {
                 mc.getChannel().sendMessage("__**Racial slurs are discouraged!**__");
             } else
@@ -488,6 +496,86 @@ public class MiatMain {
             join.addField("Information :", "Slash Commands are supported! \nPrefix : ``[``\nCreator : ``HAV0X#1009`` & ``arsonfrog#9475``");
             join.addField("Get Started :", "Help : ``/miathelp``\nSet Deleted Message Log Channel : ``/setlogchannel``");
             botJoin.getServer().getSystemChannel().get().sendMessage(join);
+        });
+
+        api.addReactionAddListener(ra -> {
+            //general idea for how to select target language to translate to
+            // read flag/target lang -> set as target lang -> get content of message -> send translation
+            // the long part is the flags. gonna suck making all of these flags go to a lang
+            // 7/29/2023
+
+            String emoji = ra.getEmoji().asUnicodeEmoji().orElse("");
+
+            Language targetLang = Language.ENGLISH;
+            String messageContent = ra.getMessageContent().orElse("NoContent").toString();
+
+            String deleteCandidate = ra.requestMessage().join().getAuthor().getIdAsString();
+
+            switch(emoji) {
+                case "❌":
+                    if (deleteCandidate.equals(self.getIdAsString())) {
+                        String del = ra.requestMessage().join().getIdAsString();
+                        api.getMessageById(del, ra.getChannel()).join().delete();
+                    }
+                    return;
+                case "\uD83C\uDDFA\uD83C\uDDF8": //USA English
+                    targetLang = Language.ENGLISH;
+                    break;
+                case "\uD83C\uDDEC\uD83C\uDDE7": //United Kingdom English
+                    targetLang = Language.ENGLISH;
+                    break;
+                case "\uD83C\uDDF5\uD83C\uDDF1": //Poland Polish
+                    targetLang = Language.POLISH;
+                    break;
+                case "\uD83C\uDDE8\uD83C\uDDF3": //China Chinese Simplified
+                    targetLang = Language.CHINESE_SIMPLIFIED;
+                    break;
+                case "\uD83C\uDDEE\uD83C\uDDF3": //Hindi OR India idk
+                    targetLang = Language.HINDI;
+                    break;
+                case "\uD83C\uDDF2\uD83C\uDDFD": //Mexico Spanish
+                    targetLang = Language.SPANISH;
+                    break;
+                case "\uD83C\uDDEA\uD83C\uDDF8": //Spain Spanish
+                    targetLang = Language.SPANISH;
+                    break;
+                case "\uD83C\uDDEB\uD83C\uDDF7": //France French
+                    targetLang = Language.FRENCH;
+                    break;
+                case "\uD83C\uDDF7\uD83C\uDDFA": //Russia Russian
+                    targetLang = Language.RUSSIAN;
+                    break;
+                case "\uD83C\uDDF5\uD83C\uDDF9": //Portugal Portuguese
+                    targetLang = Language.PORTUGUESE;
+                    break;
+                case "\uD83C\uDDE7\uD83C\uDDF7": //Brazil Portuguese
+                    targetLang = Language.PORTUGUESE;
+                    break;
+                case "\uD83C\uDDE9\uD83C\uDDEA": //Germany German
+                    targetLang = Language.GERMAN;
+                    break;
+                case "\uD83C\uDDEF\uD83C\uDDF5": //Japan Japanese
+                    targetLang = Language.JAPANESE;
+                    break;
+                case "\uD83C\uDDF5\uD83C\uDDED": //Philippines Filipino
+                    targetLang = Language.FILIPINO;
+                    break;
+                case "\uD83C\uDDF0\uD83C\uDDF7": //South Korea Korean
+                    targetLang = Language.KOREAN;
+                    break;
+                case "\uD83C\uDDF0\uD83C\uDDF5": //North Korea Korean
+                    targetLang = Language.KOREAN;
+                    break;
+                case "\uD83C\uDDFB\uD83C\uDDF3": //Vietnam Vietnamese
+                    targetLang = Language.VIETNAMESE;
+                    break;
+                case "\uD83C\uDDEE\uD83C\uDDF9": //Italy Italian
+                    targetLang = Language.ITALIAN;
+                    break;
+                default:
+                    return;
+            }
+            ra.getChannel().sendMessage(Trnsl.trnsl(messageContent, targetLang));
         });
     }
 }
