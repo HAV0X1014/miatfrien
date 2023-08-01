@@ -22,9 +22,7 @@ public class ServerInfo {
         String ownerName;
         try {
             ownerName = api.getUserById(ownerID).get().getDiscriminatedName().toString();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
         String serverID = interaction.getServer().get().getIdAsString();

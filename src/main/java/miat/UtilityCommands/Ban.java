@@ -6,8 +6,6 @@ import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SlashCommandInteraction;
 
-import java.io.FileNotFoundException;
-
 public class Ban {
     public static String ban(SlashCommandInteraction interaction) {
         User user2ban = interaction.getArgumentByIndex(0).get().getUserValue().get();
@@ -15,12 +13,8 @@ public class Ban {
         String replyContent;
 
         if (CheckPermission.checkPermission(interaction, PermissionType.BAN_MEMBERS)) {
-            try {
-                if (Whitelist.whitelisted(user2ban.getIdAsString())) {
-                    replyContent = "Failed to ban user " + username2ban + ".";
-                }
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
+            if (Whitelist.whitelisted(user2ban.getIdAsString())) {
+                replyContent = "Failed to ban user " + username2ban + ".";
             }
             interaction.getServer().get().banUser(user2ban);
             replyContent = "Banned user " + username2ban + ".";

@@ -20,9 +20,7 @@ public class Purge {
         if (CheckPermission.checkPermission(interaction, PermissionType.MANAGE_MESSAGES)) {
             try {
                 interaction.getChannel().get().getMessages(deleteAmt).get().deleteAll();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }
             returnMessage = "Purged " + deleteAmt + " messages.";
@@ -48,9 +46,7 @@ public class Purge {
         if (CheckPermission.checkPermission(mc,PermissionType.MANAGE_MESSAGES)) {
             try {
                 mc.getChannel().getMessages(amount).get().deleteAll();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }
             returnMessage = "Purged " + amount + " messages.";

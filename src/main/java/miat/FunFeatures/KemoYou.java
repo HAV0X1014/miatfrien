@@ -1,5 +1,6 @@
 package miat.FunFeatures;
 
+import miat.FileHandlers.ConfigHandler;
 import miat.FileHandlers.ReadFirstLine;
 import miat.FileHandlers.ReadFull;
 import okhttp3.OkHttpClient;
@@ -24,7 +25,7 @@ public class KemoYou {
         URL url = null;
         int code;
         try {
-            url = new URL("https://api.betterapi.net/youchat?inputs=" + ReadFull.read("ServerFiles/KemoYouPrompts/" + character + ".txt") + prompt + "&key=" + ReadFirstLine.read("ServerFiles/apiKey.txt"));
+            url = new URL("https://api.betterapi.net/youchat?inputs=" + ReadFull.read("ServerFiles/KemoYouPrompts/" + character + ".txt") + prompt + "&key=" + ConfigHandler.getString("BetterAPIKey"));
             Request request = new Request.Builder().url(url).build();
 
             String responseContent;

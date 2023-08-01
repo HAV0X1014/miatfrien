@@ -1,6 +1,7 @@
 package miat;
 
 import me.bush.translator.Language;
+import me.bush.translator.Translator;
 import miat.FileHandlers.*;
 import miat.FunFeatures.*;
 import miat.UtilityCommands.*;
@@ -8,31 +9,34 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.channel.Channel;
-import org.javacord.api.entity.emoji.Emoji;
-import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageFlag;
-import org.javacord.api.entity.message.Reaction;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Permissions;
 import org.javacord.api.entity.permission.PermissionsBuilder;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.*;
-import org.javacord.api.listener.message.reaction.ReactionAddListener;
 
 import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Random;
 
 public class MiatMain {
     static boolean debugmessagelog;
-    static String token = MiatToken.read("ServerFiles/token.txt"); //replace token.txt with the filename of the txt with your token
+    static String token = ConfigHandler.getString("Token");
+    static String prefix = ConfigHandler.getString("Prefix");
+    static String botName = ConfigHandler.getString("BotName");
+    static boolean deeplEnabled = Boolean.parseBoolean(ConfigHandler.getString("DeepLEnabled"));
+    static String deepLEmoji = ConfigHandler.getString("DeepLEmoji");
+    static boolean useGoogleAsFallbackForDeepL = Boolean.parseBoolean(ConfigHandler.getString("UseGoogleTranslateAsFallbackForDeepL"));
+    static String deepLKey = ConfigHandler.getString("DeepLKey");
+    static String[] ignoredChannels = ConfigHandler.getArray("TranslatorFlagIgnoredChannels");
 
     public static void main(String[] args) {
         DiscordApi api = new DiscordApiBuilder().setToken(token).setAllIntents().login().join();
@@ -41,8 +45,10 @@ public class MiatMain {
         User self = api.getYourself();
         String time = new Date().toString();
         Permissions admin = new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build();
+        Translator translator = new Translator(); //google translate object
+        com.deepl.api.Translator deepLTranslator = new com.deepl.api.Translator(deepLKey); //deepL translator object
 
-        api.updateActivity(ActivityType.PLAYING,"Miat has AI and animal facts!");
+        api.updateActivity(ActivityType.PLAYING,"Miat has Flag Translation!");
 
         //SlashCommand.with("ping", "Check if the bot is up.").createGlobal(api).join();
         //SlashCommand.with("uptime", "Get the uptime of the bot.").createGlobal(api).join();
@@ -81,110 +87,93 @@ public class MiatMain {
         //slash commands
         api.addSlashCommandCreateListener(event -> {
             SlashCommandInteraction interaction = event.getSlashCommandInteraction();
+            String command = interaction.getCommandName();
+            switch(command) {
+                case "ping":
+                    interaction.createImmediateResponder().setContent("Pong. Plain and simple.").setFlags(MessageFlag.EPHEMERAL).respond();
+                    break;
+                case "uptime":
+                    interaction.createImmediateResponder().setContent(Uptime.uptime(startTime)).respond();
+                    break;
+                case "purge":
+                    Purge.purge(interaction);
+                    break;
+                case "delete":
+                    DeleteMessage.deleteMessage(interaction, api);
+                    break;
+                case "pfp":
+                    Pfp.pfp(interaction);
+                    break;
+                case "serverinfo":
+                    interaction.createImmediateResponder().setContent("").addEmbed(ServerInfo.serverInfo(interaction, api)).respond();
+                    break;
+                case "setlogchannel":
+                    interaction.createImmediateResponder().setContent(SetLogChannel.setlogchannel(interaction)).respond();
+                    break;
+                case "ban":
+                    interaction.createImmediateResponder().setContent(Ban.ban(interaction)).setFlags(MessageFlag.EPHEMERAL).respond();
+                    break;
+                case "kick":
+                    interaction.createImmediateResponder().setContent(Kick.kick(interaction)).setFlags(MessageFlag.EPHEMERAL).respond();
+                    break;
+                case "miathelp":
+                    interaction.createImmediateResponder().setContent("").addEmbed(Help.help(interaction)).respond();
+                    break;
+                case "invite":
+                    interaction.createImmediateResponder().setContent(api.createBotInvite(admin)).setFlags(MessageFlag.EPHEMERAL).respond();
+                    break;
 
-            if (interaction.getCommandName().equals("ping")) {
-                interaction.createImmediateResponder().setContent("Pong. Plain and simple.").setFlags(MessageFlag.EPHEMERAL).respond();
-            }
-
-            if (interaction.getCommandName().equals("uptime")) {
-                interaction.createImmediateResponder().setContent(Uptime.uptime(startTime)).respond();
-            }
-
-            if (interaction.getCommandName().equals("purge")) {
-                Purge.purge(interaction);
-            }
-
-            if (interaction.getCommandName().equals("delete")) {
-                DeleteMessage.deleteMessage(interaction, api);
-            }
-
-            if (interaction.getCommandName().equals("pfp")) {
-                Pfp.pfp(interaction);
-            }
-
-            if (interaction.getCommandName().equals("serverinfo")) {
-                interaction.createImmediateResponder().setContent("").addEmbed(ServerInfo.serverInfo(interaction, api)).respond();
-            }
-
-            if (interaction.getCommandName().equals("setlogchannel")) {
-                interaction.createImmediateResponder().setContent(SetLogChannel.setlogchannel(interaction)).respond();
-            }
-
-            if (interaction.getCommandName().equals("ban")) {
-                interaction.createImmediateResponder().setContent(Ban.ban(interaction)).setFlags(MessageFlag.EPHEMERAL).respond();
-            }
-
-            if (interaction.getCommandName().equals("kick")) {
-                interaction.createImmediateResponder().setContent(Kick.kick(interaction)).setFlags(MessageFlag.EPHEMERAL).respond();
-            }
-
-            if (interaction.getCommandName().equals("miathelp")) {
-                interaction.createImmediateResponder().setContent("").addEmbed(Help.help(interaction)).respond();
-            }
-
-            if (interaction.getCommandName().equals("invite")) {
-                interaction.createImmediateResponder().setContent(api.createBotInvite(admin)).setFlags(MessageFlag.EPHEMERAL).respond();
-            }
-
-            //fun commands below
-
-            if (interaction.getCommandName().equals("pointcheck")) {
-                if (interaction.getArgumentUserValueByIndex(0).isPresent()) {
-                    V0XpointChecker.user(interaction);
-                }
-                if (interaction.getArgumentBooleanValueByIndex(0).isPresent()) {
-                    V0XpointChecker.top(interaction);
-                }
-                if (!interaction.getOptionByIndex(0).isPresent()) {
-                    V0XpointChecker.pointCheck(interaction);
-                }
-            }
-
-            if (interaction.getCommandName().equals("wiki")) {
-                interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
-                    interactionOriginalResponseUpdater.setContent(Wikipedia.randomArticle()).update();
-                });
-            }
-
-            if (interaction.getCommandName().equals("miat")) {
-                interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
-                    interactionOriginalResponseUpdater.setContent("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 13) + ".png?raw=true").update();
-                });
-            }
-
-            if (interaction.getCommandName().equals("inspiro")) {
-                interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
-                    interactionOriginalResponseUpdater.setContent(Inspiro.inspiro()).update();
-                });
-            }
-
-            if (interaction.getCommandName().equals("randfr")) {
-               interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
-                   interactionOriginalResponseUpdater.setContent(RandFr.randomFriend()).update();
-               });
-            }
-
-            if (interaction.getCommandName().equals("godsays")) {
-                interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
-                    interactionOriginalResponseUpdater.setContent(Godsays.godSays()).update();
-                });
-            }
-
-            if (interaction.getCommandName().equals("animalfact")) {
-                interaction.createImmediateResponder().setContent("").addEmbed(AnimalFact.animalFact()).respond();
-            }
-
-            if (interaction.getCommandName().equals("joke")) {
-                interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
-                    interactionOriginalResponseUpdater.setContent("").addEmbed(RandomJoke.randomJoke()).update();
-                });
-            }
-
-            if (interaction.getCommandName().equals("createqr")) {
-                String data = interaction.getArgumentStringValueByIndex(0).get();
-                interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
-                    interactionOriginalResponseUpdater.setContent("").addEmbed(QRCodeCreate.qrCodeCreate(data)).update();
-                });
+                //fun commands below
+                case "pointcheck":
+                    if (interaction.getArgumentUserValueByIndex(0).isPresent()) {
+                        V0XpointChecker.user(interaction);
+                    }
+                    if (interaction.getArgumentBooleanValueByIndex(0).isPresent()) {
+                        V0XpointChecker.top(interaction);
+                    }
+                    if (!interaction.getOptionByIndex(0).isPresent()) {
+                        V0XpointChecker.pointCheck(interaction);
+                    }
+                    break;
+                case "wiki":
+                    interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                        interactionOriginalResponseUpdater.setContent(Wikipedia.randomArticle()).update();
+                    });
+                    break;
+                case "miat":
+                    interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                        interactionOriginalResponseUpdater.setContent("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 13) + ".png?raw=true").update();
+                    });
+                    break;
+                case "inspiro":
+                    interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                        interactionOriginalResponseUpdater.setContent(Inspiro.inspiro()).update();
+                    });
+                    break;
+                case "randfr":
+                    interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                        interactionOriginalResponseUpdater.setContent(RandFr.randomFriend()).update();
+                    });
+                    break;
+                case "godsays":
+                    interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                        interactionOriginalResponseUpdater.setContent(Godsays.godSays()).update();
+                    });
+                    break;
+                case "animalfact":
+                    interaction.createImmediateResponder().setContent("").addEmbed(AnimalFact.animalFact()).respond();
+                    break;
+                case "joke":
+                    interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                        interactionOriginalResponseUpdater.setContent("").addEmbed(RandomJoke.randomJoke()).update();
+                    });
+                    break;
+                case "createqr":
+                    String data = interaction.getArgumentStringValueByIndex(0).get();
+                    interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                        interactionOriginalResponseUpdater.setContent("").addEmbed(QRCodeCreate.qrCodeCreate(data)).update();
+                    });
+                    break;
             }
         });
 
@@ -197,232 +186,214 @@ public class MiatMain {
             if (debugmessagelog) {
                 if (!mc.getMessageAuthor().equals(self) && !mc.getMessageAuthor().toString().equals("MessageAuthor (id: 919786500890173441, name: Miat Bot)")) {
                     try {
-                        Webhook.send(ReadFirstLine.read("ServerFiles/webhookURL.txt"), "'" + m + "'\n\n- " + author + "\n- At " + time + " \n- " + server);
+                        Webhook.send(ConfigHandler.getString("WebhookURL"), "'" + m + "'\n\n- " + author + "\n- At " + time + " \n- " + server);
                     } catch (IOException e1) {
                         e1.printStackTrace();
                     }
                 }
             }
-            if (m.startsWith("[")) {
+            if (m.startsWith(prefix)) {
                 System.out.println(m);
             }
 
-            if (m.toLowerCase().startsWith("[randfr")) {
-                mc.getMessage().reply(RandFr.randomFriend());
-            } else
-
-            if (m.toLowerCase().startsWith("[inspiro")) {
-                mc.getMessage().reply(Inspiro.inspiro());
-            } else
-
-            if (m.toLowerCase().startsWith("[godsays")) {
-                mc.getMessage().reply(Godsays.godSays());
-            } else
-
-            if (m.toLowerCase().startsWith("[miat")) {
-                mc.getMessage().reply("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 17) + ".png?raw=true");
-            } else
-
-            if (m.toLowerCase().startsWith("[base64")) {
-                mc.getMessage().reply(Vase64.vase64(m));
-            } else
-
-            if (m.toLowerCase().startsWith("[help")) {
-                mc.getMessage().reply("Help is in the ``/miathelp`` slash command now!");
-            } else
-
-            if (m.toLowerCase().startsWith("[setactivity")) {
-                mc.getMessage().reply(SetActivity.setactivity(m,mc,api));
-            } else
-
-            if (m.toLowerCase().startsWith("[animalfact")) {
-                mc.getMessage().reply(AnimalFact.animalFact());
-            } else
-
-            if (m.toLowerCase().startsWith("[wiki")) {
-                mc.getMessage().reply(Wikipedia.randomArticle());
-            } else
-
-            if (m.toLowerCase().startsWith("[uptime")) {
-                mc.getMessage().reply(Uptime.uptime(startTime));
-            } else
-
-            if (m.toLowerCase().startsWith("[joke")) {
-                Random random = new Random();
-                int randomNumber = random.nextInt(15);
-                if (randomNumber == 0 || randomNumber == 1) {
-                    mc.addReactionsToMessage("\uD83E\uDDBA");
-                    mc.addReactionsToMessage("\uD83D\uDEE0️");
-                    mc.addReactionsToMessage("\uD83D\uDEA7");
-                    mc.addReactionsToMessage("\uD83D\uDC77");
-                    mc.getMessage().reply("https://cdn.discordapp.com/attachments/1100888255483875428/1123410595333537943/under_construction.mp4");
-                } else {
-                    mc.getMessage().reply(RandomJoke.randomJoke());
-                }
-            } else
-
-            if (m.toLowerCase().startsWith("[qr")) {
-                String data = m.replace("[qr ","");
-                mc.getMessage().reply(QRCodeCreate.qrCodeCreate(data));
-            } else
-
-            if (m.toLowerCase().startsWith("[yc")) {
-                String prompt = m.replace("[yc ", "");
-                mc.addReactionsToMessage("\uD83D\uDCE8");
-
-                Thread youThread = new Thread(() -> {
-                    YouChat.youChat(prompt,mc);
-                    mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDCE8");
-                });
-                youThread.start();
-            } else
-
-            if (m.toLowerCase().startsWith("[topi")) {
-                String prompt = m.toLowerCase().replace("[topi ", "");
-                mc.addReactionsToMessage("\uD83C\uDFDE️");
-
-                Thread kemoThread = new Thread(() -> {
-                    KemoYou.kemoYou("Topi",prompt,mc);
-                    mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                });
-                kemoThread.start();
-            } else
-
-            if (m.toLowerCase().startsWith("[serval")) {
-                String prompt = m.toLowerCase().replace("[serval ", "");
-                mc.addReactionsToMessage("\uD83C\uDFDE️");
-
-                Thread kemoThread = new Thread(() -> {
-                    KemoYou.kemoYou("Serval",prompt,mc);
-                    mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                });
-                kemoThread.start();
-            } else
-
-            if (m.toLowerCase().startsWith("[blackbuck")) {
-                String prompt = m.toLowerCase().replace("[blackbuck ", "");
-                mc.addReactionsToMessage("\uD83C\uDFDE️");
-
-                Thread kemoThread = new Thread(() -> {
-                    KemoYou.kemoYou("Blackbuck",prompt,mc);
-                    mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                });
-                kemoThread.start();
-            } else
-
-            if (m.toLowerCase().startsWith("[wolverine")) {
-                String prompt = m.toLowerCase().replace("[wolverine ", "");
-                mc.addReactionsToMessage("\uD83C\uDFDE");
-
-                Thread kemoThread = new Thread(() -> {
-                    KemoYou.kemoYou("Wolverine",prompt,mc);
-                    mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                });
-                kemoThread.start();
-            } else
-
-            if (m.toLowerCase().startsWith("[silverfox")) {
-                String prompt = m.toLowerCase().replace("[silverfox ", "");
-                mc.addReactionsToMessage("\uD83C\uDFDE");
-
-                Thread kemoThread = new Thread(() -> {
-                    KemoYou.kemoYou("SilverFox",prompt,mc);
-                    mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                });
-                kemoThread.start();
-            } else
-
-            if (m.toLowerCase().startsWith("[tact")) {
-                String prompt = m.toLowerCase().replace("[tact ","");
-                mc.addReactionsToMessage("\uD83D\uDE80");
-
-                Thread tactThread = new Thread(() -> {
-                    KemoYou.kemoYou("Tact",prompt,mc);
-                    mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
-                });
-                tactThread.start();
-            } else
-
-            if (m.toLowerCase().startsWith("[bestclient")) {
-                Color seppuku = new Color(153,0,238);
-                EmbedBuilder e = new EmbedBuilder()
-                        .setTitle("Seppuku")
-                        .setDescription("Seppuku is one of the best clients of all time, ever!")
-                        .setAuthor("Seppuku","https://github.com/seppukudevelopment/seppuku", "https://github.com/seppukudevelopment/seppuku/raw/master/res/seppuku_full.png")
-                        .addField("Seppuku Download", "https://github.com/seppukudevelopment/seppuku/releases")
-                        .addInlineField("Github", "https://github.com/seppukudevelopment/seppuku")
-                        .addInlineField("Website", "https://seppuku.pw")
-                        .setColor(seppuku)
-                        .setFooter("Seppuku","https://github.com/seppukudevelopment/seppuku")
-                        .setImage("https://github.com/seppukudevelopment/seppuku/blob/master/res/seppuku_full.png?raw=true")
-                        .setThumbnail("https://github.com/seppukudevelopment/seppuku/blob/master/src/main/resources/assets/seppukumod/textures/seppuku-logo.png?raw=true");
-                mc.getMessage().reply(e);
-            } else
-
-            if (m.toLowerCase().startsWith("[ml on")) {
+            if (m.toLowerCase().startsWith(prefix + "ml on")) {
                 String id = mc.getMessageAuthor().getIdAsString();
-                try {
-                    if (Whitelist.whitelisted(id)) {
-                        debugmessagelog = true;
-                        mc.getMessage().reply("Debug Message Log on.");
-                    } else {
-                        mc.getMessage().reply("You are not on the debug whitelist.");
-                    }
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            } else
-
-            if (m.toLowerCase().startsWith("[ml off")) {
-                String id = mc.getMessageAuthor().getIdAsString();
-                try {
-                    if (Whitelist.whitelisted(id)) {
-                        debugmessagelog = false;
-                        mc.getMessage().reply("Debug Message Log off.");
-                    } else {
-                        mc.getMessage().reply("You are not on the debug whitelist.");
-                    }
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            } else
-
-            if (m.toLowerCase().startsWith("[remove")){
-                String miatId = mc.getMessage().getMessageReference().get().getMessage().get().getAuthor().getIdAsString();
-                //gets the author id of the message that 'should' have the command response. This is the variable that stores the message that is requested to be deleted.
-
-                String commandIssuer = mc.getMessage().getMessageReference().get().getMessage().get().getReferencedMessage().get().getAuthor().getIdAsString();
-                //gets the author id of the command issuer. This is the variable that stores the author of the original command so only the author can delete their command response.
-
-                System.out.println(commandIssuer);
-                //dont knock it if it works
-                if (miatId.equals(self.getIdAsString()) && mc.getMessageAuthor().getIdAsString().equals(commandIssuer)) {
-                    DelOwn.delOwn(mc, api);
-                    mc.getMessage().delete();
+                if (Whitelist.whitelisted(id)) {
+                    debugmessagelog = true;
+                    mc.getMessage().reply("Debug Message Log on.");
                 } else {
-                    mc.getMessage().reply("You cannot delete others' messages using this command.");
+                    mc.getMessage().reply("You are not on the debug whitelist.");
                 }
-            } else
+            }
 
-            if (m.startsWith("[purge ")) {
-                String amt = m.replace("[purge ","");
-                mc.getMessage().reply(Purge.purge(mc, amt));
-                Thread removeNotice = new Thread(() -> {
-                    Message notif = mc.getChannel().getMessages(1).join().getNewestMessage().get();
-                    try {
-                        Thread.sleep(10000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+            if (m.toLowerCase().startsWith(prefix + "ml off")) {
+                String id = mc.getMessageAuthor().getIdAsString();
+                if (Whitelist.whitelisted(id)) {
+                    debugmessagelog = false;
+                    mc.getMessage().reply("Debug Message Log off.");
+                } else {
+                    mc.getMessage().reply("You are not on the debug whitelist.");
+                }
+            }
+
+            String[] parts = m.split(" ", 2);
+            String command = parts[0].toLowerCase().replace(prefix,"");
+
+            switch(command) {
+                case "randfr":
+                    mc.getMessage().reply(RandFr.randomFriend());
+                    break;
+                case "inspiro":
+                    mc.getMessage().reply(Inspiro.inspiro());
+                    break;
+                case "godsays":
+                    mc.getMessage().reply(Godsays.godSays());
+                    break;
+                case "miat":
+                    mc.getMessage().reply("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 17) + ".png?raw=true");
+                    break;
+                case "base64":
+                    mc.getMessage().reply(Vase64.vase64(m));
+                    break;
+                case "help":
+                    mc.getMessage().reply("Help is in the ``/miathelp`` slash command now!");
+                    break;
+                case "setactivity":
+                    mc.getMessage().reply(SetActivity.setactivity(m,mc,api,prefix));
+                    break;
+                case "animalfact":
+                    mc.getMessage().reply(AnimalFact.animalFact());
+                    break;
+                case "wiki":
+                    mc.getMessage().reply(Wikipedia.randomArticle());
+                    break;
+                case "uptime":
+                    mc.getMessage().reply(Uptime.uptime(startTime));
+                    break;
+                case "joke":
+                    Random random = new Random();
+                    int randomNumber = random.nextInt(15);
+                    if (randomNumber == 0 || randomNumber == 1) {
+                        mc.addReactionsToMessage("\uD83E\uDDBA");
+                        mc.addReactionsToMessage("\uD83D\uDEE0️");
+                        mc.addReactionsToMessage("\uD83D\uDEA7");
+                        mc.addReactionsToMessage("\uD83D\uDC77");
+                        mc.getMessage().reply("https://cdn.discordapp.com/attachments/1100888255483875428/1123410595333537943/under_construction.mp4");
+                    } else {
+                        mc.getMessage().reply(RandomJoke.randomJoke());
                     }
-                    notif.delete();
-                });
-                removeNotice.start();
-            } else
+                    break;
+                case "qr":
+                    String data = m.replace(prefix + "qr ","");
+                    mc.getMessage().reply(QRCodeCreate.qrCodeCreate(data));
+                    break;
+                case "yc":
+                    String prompt = m.replace(prefix + "yc ", "");
+                    mc.addReactionsToMessage("\uD83D\uDCE8");
 
-            if (m.startsWith("[translate")) {
-                String textToTranslate = m.replace("[translate ", "");
-                mc.getMessage().reply(Trnsl.trnsl(textToTranslate, Language.ENGLISH));
-            } else
+                    Thread youThread = new Thread(() -> {
+                        YouChat.youChat(prompt,mc);
+                        mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDCE8");
+                    });
+                    youThread.start();
+                    break;
+                case "topi":
+                    String topiPrompt = m.replace(prefix + "topi ", "");
+                    mc.addReactionsToMessage("\uD83C\uDFDE️");
+
+                    Thread topiThread = new Thread(() -> {
+                        KemoYou.kemoYou("Topi",topiPrompt,mc);
+                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                    });
+                    topiThread.start();
+                    break;
+                case "serval":
+                    String servalPrompt = m.toLowerCase().replace(prefix + "serval ", "");
+                    mc.addReactionsToMessage("\uD83C\uDFDE️");
+
+                    Thread servalThread = new Thread(() -> {
+                        KemoYou.kemoYou("Serval",servalPrompt,mc);
+                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                    });
+                    servalThread.start();
+                    break;
+                case "blackbuck":
+                    String blackbuckPrompt = m.toLowerCase().replace(prefix + "blackbuck ", "");
+                    mc.addReactionsToMessage("\uD83C\uDFDE️");
+
+                    Thread blackbuckThread = new Thread(() -> {
+                        KemoYou.kemoYou("Blackbuck",blackbuckPrompt,mc);
+                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                    });
+                    blackbuckThread.start();
+                    break;
+                case "wolverine":
+                    String wolverinePrompt = m.toLowerCase().replace(prefix + "wolverine ", "");
+                    mc.addReactionsToMessage("\uD83C\uDFDE");
+
+                    Thread wolverineThread = new Thread(() -> {
+                        KemoYou.kemoYou("Wolverine",wolverinePrompt,mc);
+                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                    });
+                    wolverineThread.start();
+                    break;
+                case "silverfox":
+                    String silverfoxPrompt = m.toLowerCase().replace(prefix + "silverfox ", "");
+                    mc.addReactionsToMessage("\uD83C\uDFDE");
+
+                    Thread silverfoxThread = new Thread(() -> {
+                        KemoYou.kemoYou("SilverFox",silverfoxPrompt,mc);
+                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                    });
+                    silverfoxThread.start();
+                    break;
+                case "tact":
+                    String tactPrompt = m.toLowerCase().replace(prefix + "tact ","");
+                    mc.addReactionsToMessage("\uD83D\uDE80");
+
+                    Thread tactThread = new Thread(() -> {
+                        KemoYou.kemoYou("Tact",tactPrompt,mc);
+                        mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
+                    });
+                    tactThread.start();
+                    break;
+                case "bestclient":
+                    Color seppuku = new Color(153,0,238);
+                    EmbedBuilder e = new EmbedBuilder()
+                            .setTitle("Seppuku")
+                            .setDescription("Seppuku is one of the best clients of all time, ever!")
+                            .setAuthor("Seppuku","https://github.com/seppukudevelopment/seppuku", "https://github.com/seppukudevelopment/seppuku/raw/master/res/seppuku_full.png")
+                            .addField("Seppuku Download", "https://github.com/seppukudevelopment/seppuku/releases")
+                            .addInlineField("Github", "https://github.com/seppukudevelopment/seppuku")
+                            .addInlineField("Website", "https://seppuku.pw")
+                            .setColor(seppuku)
+                            .setFooter("Seppuku","https://github.com/seppukudevelopment/seppuku")
+                            .setImage("https://github.com/seppukudevelopment/seppuku/blob/master/res/seppuku_full.png?raw=true")
+                            .setThumbnail("https://github.com/seppukudevelopment/seppuku/blob/master/src/main/resources/assets/seppukumod/textures/seppuku-logo.png?raw=true");
+                    mc.getMessage().reply(e);
+                    break;
+                case "remove":
+                    String miatId = mc.getMessage().getMessageReference().get().getMessage().get().getAuthor().getIdAsString();
+                    //gets the author id of the message that 'should' have the command response. This is the variable that stores the message that is requested to be deleted.
+
+                    String commandIssuer = mc.getMessage().getMessageReference().get().getMessage().get().getReferencedMessage().get().getAuthor().getIdAsString();
+                    //gets the author id of the command issuer. This is the variable that stores the author of the original command so only the author can delete their command response.
+
+                    //System.out.println(commandIssuer);
+                    //dont knock it if it works
+                    if (miatId.equals(self.getIdAsString()) && mc.getMessageAuthor().getIdAsString().equals(commandIssuer)) {
+                        DelOwn.delOwn(mc, api);
+                        mc.getMessage().delete();
+                    } else {
+                        mc.getMessage().reply("You cannot delete others' messages using this command.");
+                    }
+                    break;
+                case "purge":
+                    String amt = m.replace(prefix + "purge ","");
+                    mc.getMessage().reply(Purge.purge(mc, amt));
+                    Thread removeNotice = new Thread(() -> {
+                        Message notif = mc.getChannel().getMessages(1).join().getNewestMessage().get();
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        notif.delete();
+                    });
+                    removeNotice.start();
+                    break;
+                case "translate":
+                    String textToTranslate = m.replace(prefix + "translate ", "");
+                    mc.getMessage().reply(Trnsl.trnsl(translator, textToTranslate, Language.ENGLISH));
+                    break;
+                case "deepl":
+                    String deepLTextToTranslate = m.replace(prefix + "deepl ", "");
+                    mc.getMessage().reply(DeepL.deepl(deepLTranslator, deepLTextToTranslate,"en-US"));
+                    break;
+                //default:
+                //    mc.getChannel().sendMessage("Unknown command. Use ``/miathelp`` for a list of commands.");
+                //    break;
+            }
 
             if (m.toLowerCase().contains("nigg") || m.toLowerCase().contains("n1gg") || m.toLowerCase().contains("kotlin user")) {
                 mc.getChannel().sendMessage("__**Racial slurs are discouraged!**__");
@@ -456,10 +427,6 @@ public class MiatMain {
             if (m.toLowerCase().contains("i like kotlin")) {
                 int down = -1;
                 V0Xpoints.hV0Xpoints(mc, api, down);
-            } else
-
-            if (m.startsWith("[")) {
-                mc.getChannel().sendMessage("Unknown command. Use ``/miathelp`` for a list of commands.");
             }
         });
 
@@ -493,89 +460,151 @@ public class MiatMain {
             join.setAuthor(me);
             join.setTitle("Hello, Miat Fren is here!");
             join.setThumbnail("https://cdn.discordapp.com/attachments/919786447488290816/920839787789836288/miat.jpeg");
-            join.addField("Information :", "Slash Commands are supported! \nPrefix : ``[``\nCreator : ``HAV0X#1009`` & ``arsonfrog#9475``");
+            join.addField("Information :", "Slash Commands are supported! \nPrefix : ``" + prefix +"``\nCreator : ``HAV0X#1009`` & ``arsonfrog#9475``");
             join.addField("Get Started :", "Help : ``/miathelp``\nSet Deleted Message Log Channel : ``/setlogchannel``");
             botJoin.getServer().getSystemChannel().get().sendMessage(join);
         });
 
         api.addReactionAddListener(ra -> {
-            //general idea for how to select target language to translate to
-            // read flag/target lang -> set as target lang -> get content of message -> send translation
-            // the long part is the flags. gonna suck making all of these flags go to a lang
-            // 7/29/2023
-
             String emoji = ra.getEmoji().asUnicodeEmoji().orElse("");
+            String allemoji = ra.requestMessage().join().getReactions().toString();
 
-            Language targetLang = Language.ENGLISH;
-            String messageContent = ra.getMessageContent().orElse("NoContent").toString();
+            String messageContent = ra.requestMessage().join().getContent();
 
             String deleteCandidate = ra.requestMessage().join().getAuthor().getIdAsString();
 
+            Language targetLang;
+            String dlLang = null;
+
             switch(emoji) {
                 case "❌":
-                    if (deleteCandidate.equals(self.getIdAsString())) {
-                        String del = ra.requestMessage().join().getIdAsString();
-                        api.getMessageById(del, ra.getChannel()).join().delete();
+                    if (deleteCandidate.equals(self.getIdAsString())) { //self delete when X emoji is seen
+                        if (ra.requestMessage().join().getEmbeds().get(0).getTitle().toString().startsWith("Translated Text")) { //only delete if it is a translation message
+                            String del = ra.requestMessage().join().getIdAsString();
+                            api.getMessageById(del, ra.getChannel()).join().delete();
+                        }
                     }
                     return;
+
                 case "\uD83C\uDDFA\uD83C\uDDF8": //USA English
+                case "\uD83C\uDDE8\uD83C\uDDE6": //Canada English
+                case "\uD83C\uDDFB\uD83C\uDDEE": //US Virgin Islands English
+                case "\uD83C\uDDEC\uD83C\uDDFA": //Guam English
                     targetLang = Language.ENGLISH;
+                    dlLang = "en-US";
                     break;
+                case "\uD83C\uDDE6\uD83C\uDDFA": //Australia English
                 case "\uD83C\uDDEC\uD83C\uDDE7": //United Kingdom English
+                case "\uD83C\uDDF3\uD83C\uDDFF": //New Zealand English
+                case "\uD83C\uDDFB\uD83C\uDDEC": //British Virgin Islands English
+                case "\uD83C\uDDEC\uD83C\uDDEE": //Gibraltar English
+                case "\uD83C\uDDEE\uD83C\uDDF2": //Isle of Man English
                     targetLang = Language.ENGLISH;
+                    dlLang = "en-GB";
                     break;
                 case "\uD83C\uDDF5\uD83C\uDDF1": //Poland Polish
                     targetLang = Language.POLISH;
+                    dlLang = "pl";
                     break;
                 case "\uD83C\uDDE8\uD83C\uDDF3": //China Chinese Simplified
+                case "\uD83C\uDDF8\uD83C\uDDEC": //Singapore Chinese Simplified
                     targetLang = Language.CHINESE_SIMPLIFIED;
+                    dlLang = "zh";
+                    break;
+                case "\uD83C\uDDED\uD83C\uDDF0": //Hong Kong Chinese Traditional
+                case "\uD83C\uDDF9\uD83C\uDDFC": //Taiwan Chinese Traditional
+                    targetLang = Language.CHINESE_TRADITIONAL;
+                    dlLang = "zh";
                     break;
                 case "\uD83C\uDDEE\uD83C\uDDF3": //Hindi OR India idk
+                case "\uD83C\uDDF5\uD83C\uDDF0": //Pakistan Hindi
                     targetLang = Language.HINDI;
                     break;
                 case "\uD83C\uDDF2\uD83C\uDDFD": //Mexico Spanish
-                    targetLang = Language.SPANISH;
-                    break;
+                case "\uD83C\uDDE8\uD83C\uDDF4": //Colombia Spanish
                 case "\uD83C\uDDEA\uD83C\uDDF8": //Spain Spanish
+                case "\uD83C\uDDE6\uD83C\uDDF7": //Argentina Spanish
+                case "\uD83C\uDDF5\uD83C\uDDEA": //Peru Spanish
+                case "\uD83C\uDDFB\uD83C\uDDEA": //Venezuela Spanish
+                case "\uD83C\uDDE8\uD83C\uDDF1": //Chile Spanish
+                case "\uD83C\uDDEC\uD83C\uDDF9": //Guatemala Guatemala
+                case "\uD83C\uDDF5\uD83C\uDDF7": //Puerto Rico Spanish
                     targetLang = Language.SPANISH;
+                    dlLang = "es";
                     break;
                 case "\uD83C\uDDEB\uD83C\uDDF7": //France French
+                case "\uD83C\uDDF2\uD83C\uDDEC": //Madagascar French
+                case "\uD83C\uDDE8\uD83C\uDDF2": //Cameroon French
+                case "\uD83C\uDDE8\uD83C\uDDEE": //Cote d' Ivoire French
+                case "\uD83C\uDDF3\uD83C\uDDEA": //Niger French
+                case "\uD83C\uDDE7\uD83C\uDDEF": //Benin French
                     targetLang = Language.FRENCH;
+                    dlLang = "fr";
                     break;
                 case "\uD83C\uDDF7\uD83C\uDDFA": //Russia Russian
+                case "\uD83C\uDDE7\uD83C\uDDFE": //Belarus Russian
                     targetLang = Language.RUSSIAN;
+                    dlLang = "ru";
                     break;
                 case "\uD83C\uDDF5\uD83C\uDDF9": //Portugal Portuguese
+                case "\uD83C\uDDF2\uD83C\uDDFF": //Mozambique Portuguese
                     targetLang = Language.PORTUGUESE;
+                    dlLang = "pt-PT";
                     break;
                 case "\uD83C\uDDE7\uD83C\uDDF7": //Brazil Portuguese
                     targetLang = Language.PORTUGUESE;
+                    dlLang = "pt-BR";
                     break;
                 case "\uD83C\uDDE9\uD83C\uDDEA": //Germany German
+                case "\uD83C\uDDF1\uD83C\uDDEE": //Liechtenstein German
                     targetLang = Language.GERMAN;
+                    dlLang = "de";
                     break;
                 case "\uD83C\uDDEF\uD83C\uDDF5": //Japan Japanese
                     targetLang = Language.JAPANESE;
+                    dlLang = "ja";
                     break;
                 case "\uD83C\uDDF5\uD83C\uDDED": //Philippines Filipino
                     targetLang = Language.FILIPINO;
                     break;
                 case "\uD83C\uDDF0\uD83C\uDDF7": //South Korea Korean
-                    targetLang = Language.KOREAN;
-                    break;
                 case "\uD83C\uDDF0\uD83C\uDDF5": //North Korea Korean
                     targetLang = Language.KOREAN;
+                    dlLang = "ko";
                     break;
                 case "\uD83C\uDDFB\uD83C\uDDF3": //Vietnam Vietnamese
                     targetLang = Language.VIETNAMESE;
                     break;
                 case "\uD83C\uDDEE\uD83C\uDDF9": //Italy Italian
                     targetLang = Language.ITALIAN;
+                    dlLang = "it";
+                    break;
+                case "\uD83C\uDDF2\uD83C\uDDFE": //Malaysia Malay
+                case "\uD83C\uDDE7\uD83C\uDDF3": //Brunei Malay
+                    targetLang = Language.MALAY;
                     break;
                 default:
                     return;
             }
-            ra.getChannel().sendMessage(Trnsl.trnsl(messageContent, targetLang));
+            if (!Arrays.toString(ignoredChannels).contains(ra.requestMessage().join().getChannel().getIdAsString())) { //if IgnoredChannels does NOT include the reaction channel, continue
+                if (allemoji.contains(deepLEmoji)) {
+                    if (deeplEnabled) { //Check for the DeepL emoji (the one that says to use DeepL if reacted)
+                        if (dlLang == null) { //some languages aren't on DeepL. If the language isn't supported, it will be null because it wasn't set in the switch case
+                            if (useGoogleAsFallbackForDeepL) { //if DeepL isn't able to translate into the language, use Google as a fallback translator.
+                                ra.getChannel().sendMessage(Trnsl.trnsl(translator, messageContent, targetLang));
+                            } else {
+                                ra.getChannel().sendMessage("This language is not supported by DeepL.");
+                            }
+                        } else {
+                            ra.getChannel().sendMessage(DeepL.deepl(deepLTranslator, messageContent, dlLang)); //Translate if successful
+                        }
+                    } else {
+                        ra.getChannel().sendMessage(Trnsl.trnsl(translator, messageContent, targetLang)); //use Google if DeepL isnt enabled.
+                    }
+                } else {
+                    ra.getChannel().sendMessage(Trnsl.trnsl(translator, messageContent, targetLang)); //use Google if there isnt a DeepL emoji.
+                }
+            }
         });
     }
 }

@@ -35,8 +35,6 @@ public class Inspiro {
                 reader.close();
                 return responseContent.toString();
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

@@ -17,23 +17,19 @@ public class SetLogChannel {
         String serverID = interaction.getServer().get().getIdAsString();
         String returnString;
 
-        try {
-            if (CheckPermission.checkPermission(interaction, PermissionType.MANAGE_CHANNELS) || Whitelist.whitelisted(interaction.getUser().getIdAsString())) {
-                FileWriter fw;
-                try {
-                    fw = new FileWriter("ServerFiles/" + serverID + ".txt");
+        if (CheckPermission.checkPermission(interaction, PermissionType.MANAGE_CHANNELS)) {
+            FileWriter fw;
+            try {
+                fw = new FileWriter("ServerFiles/" + serverID + ".txt");
 
-                    fw.write(logChannelID);
-                    fw.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                returnString = "Log channel set to <#" + logChannelID + ">";
-            } else {
-                returnString = "You do not have MANAGE_CHANNELS permissions.";
+                fw.write(logChannelID);
+                fw.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            returnString = "Log channel set to <#" + logChannelID + ">";
+        } else {
+            returnString = "You do not have MANAGE_CHANNELS permissions.";
         }
     return returnString;
     }
