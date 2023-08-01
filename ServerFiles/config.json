@@ -1,0 +1,17 @@
+{
+  "Config": {
+    "Token": "",
+    "BotName": "this setting is unused",
+    "Prefix": "[",
+    "TranslatorFlagIgnoredChannels": ["",""],
+    "DeepLEnabled": "true",
+    "DeepLKey": "",
+    "DeepLEmoji": "\uD83C\uDDE9",
+    "UseGoogleTranslateAsFallbackForDeepL": "true",
+
+    "BetterAPIKey": "",
+    "Whitelist": ["",""],
+    "WebhookURL": ""
+  }
+}
+
