@@ -196,7 +196,7 @@ public class MiatMain {
                 System.out.println(m);
             }
 
-            if (m.toLowerCase().startsWith(prefix + "ml on")) {
+            if (m.toLowerCase().startsWith(prefix + "ml on")) { //move to switch statement
                 String id = mc.getMessageAuthor().getIdAsString();
                 if (Whitelist.whitelisted(id)) {
                     debugmessagelog = true;
@@ -206,7 +206,7 @@ public class MiatMain {
                 }
             }
 
-            if (m.toLowerCase().startsWith(prefix + "ml off")) {
+            if (m.toLowerCase().startsWith(prefix + "ml off")) { //move to switch statement
                 String id = mc.getMessageAuthor().getIdAsString();
                 if (Whitelist.whitelisted(id)) {
                     debugmessagelog = false;
@@ -216,183 +216,182 @@ public class MiatMain {
                 }
             }
 
-            String[] parts = m.split(" ", 2);
-            String command = parts[0].toLowerCase().replace(prefix,"");
+            if (m.startsWith(prefix)) {
+                String[] parts = m.split(" ", 2);
+                String command = parts[0].toLowerCase().replace(prefix, "");
 
-            switch(command) {
-                case "randfr":
-                    mc.getMessage().reply(RandFr.randomFriend());
-                    break;
-                case "inspiro":
-                    mc.getMessage().reply(Inspiro.inspiro());
-                    break;
-                case "godsays":
-                    mc.getMessage().reply(Godsays.godSays());
-                    break;
-                case "miat":
-                    mc.getMessage().reply("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 17) + ".png?raw=true");
-                    break;
-                case "base64":
-                    mc.getMessage().reply(Vase64.vase64(m));
-                    break;
-                case "help":
-                    mc.getMessage().reply("Help is in the ``/miathelp`` slash command now!");
-                    break;
-                case "setactivity":
-                    mc.getMessage().reply(SetActivity.setactivity(m,mc,api,prefix));
-                    break;
-                case "animalfact":
-                    mc.getMessage().reply(AnimalFact.animalFact());
-                    break;
-                case "wiki":
-                    mc.getMessage().reply(Wikipedia.randomArticle());
-                    break;
-                case "uptime":
-                    mc.getMessage().reply(Uptime.uptime(startTime));
-                    break;
-                case "joke":
-                    Random random = new Random();
-                    int randomNumber = random.nextInt(15);
-                    if (randomNumber == 0 || randomNumber == 1) {
-                        mc.addReactionsToMessage("\uD83E\uDDBA");
-                        mc.addReactionsToMessage("\uD83D\uDEE0️");
-                        mc.addReactionsToMessage("\uD83D\uDEA7");
-                        mc.addReactionsToMessage("\uD83D\uDC77");
-                        mc.getMessage().reply("https://cdn.discordapp.com/attachments/1100888255483875428/1123410595333537943/under_construction.mp4");
-                    } else {
-                        mc.getMessage().reply(RandomJoke.randomJoke());
-                    }
-                    break;
-                case "qr":
-                    String data = m.replace(prefix + "qr ","");
-                    mc.getMessage().reply(QRCodeCreate.qrCodeCreate(data));
-                    break;
-                case "yc":
-                    String prompt = m.replace(prefix + "yc ", "");
-                    mc.addReactionsToMessage("\uD83D\uDCE8");
-
-                    Thread youThread = new Thread(() -> {
-                        YouChat.youChat(prompt,mc);
-                        mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDCE8");
-                    });
-                    youThread.start();
-                    break;
-                case "topi":
-                    String topiPrompt = m.replace(prefix + "topi ", "");
-                    mc.addReactionsToMessage("\uD83C\uDFDE️");
-
-                    Thread topiThread = new Thread(() -> {
-                        KemoYou.kemoYou("Topi",topiPrompt,mc);
-                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                    });
-                    topiThread.start();
-                    break;
-                case "serval":
-                    String servalPrompt = m.toLowerCase().replace(prefix + "serval ", "");
-                    mc.addReactionsToMessage("\uD83C\uDFDE️");
-
-                    Thread servalThread = new Thread(() -> {
-                        KemoYou.kemoYou("Serval",servalPrompt,mc);
-                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                    });
-                    servalThread.start();
-                    break;
-                case "blackbuck":
-                    String blackbuckPrompt = m.toLowerCase().replace(prefix + "blackbuck ", "");
-                    mc.addReactionsToMessage("\uD83C\uDFDE️");
-
-                    Thread blackbuckThread = new Thread(() -> {
-                        KemoYou.kemoYou("Blackbuck",blackbuckPrompt,mc);
-                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                    });
-                    blackbuckThread.start();
-                    break;
-                case "wolverine":
-                    String wolverinePrompt = m.toLowerCase().replace(prefix + "wolverine ", "");
-                    mc.addReactionsToMessage("\uD83C\uDFDE");
-
-                    Thread wolverineThread = new Thread(() -> {
-                        KemoYou.kemoYou("Wolverine",wolverinePrompt,mc);
-                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                    });
-                    wolverineThread.start();
-                    break;
-                case "silverfox":
-                    String silverfoxPrompt = m.toLowerCase().replace(prefix + "silverfox ", "");
-                    mc.addReactionsToMessage("\uD83C\uDFDE");
-
-                    Thread silverfoxThread = new Thread(() -> {
-                        KemoYou.kemoYou("SilverFox",silverfoxPrompt,mc);
-                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                    });
-                    silverfoxThread.start();
-                    break;
-                case "tact":
-                    String tactPrompt = m.toLowerCase().replace(prefix + "tact ","");
-                    mc.addReactionsToMessage("\uD83D\uDE80");
-
-                    Thread tactThread = new Thread(() -> {
-                        KemoYou.kemoYou("Tact",tactPrompt,mc);
-                        mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
-                    });
-                    tactThread.start();
-                    break;
-                case "bestclient":
-                    Color seppuku = new Color(153,0,238);
-                    EmbedBuilder e = new EmbedBuilder()
-                            .setTitle("Seppuku")
-                            .setDescription("Seppuku is one of the best clients of all time, ever!")
-                            .setAuthor("Seppuku","https://github.com/seppukudevelopment/seppuku", "https://github.com/seppukudevelopment/seppuku/raw/master/res/seppuku_full.png")
-                            .addField("Seppuku Download", "https://github.com/seppukudevelopment/seppuku/releases")
-                            .addInlineField("Github", "https://github.com/seppukudevelopment/seppuku")
-                            .addInlineField("Website", "https://seppuku.pw")
-                            .setColor(seppuku)
-                            .setFooter("Seppuku","https://github.com/seppukudevelopment/seppuku")
-                            .setImage("https://github.com/seppukudevelopment/seppuku/blob/master/res/seppuku_full.png?raw=true")
-                            .setThumbnail("https://github.com/seppukudevelopment/seppuku/blob/master/src/main/resources/assets/seppukumod/textures/seppuku-logo.png?raw=true");
-                    mc.getMessage().reply(e);
-                    break;
-                case "remove":
-                    String miatId = mc.getMessage().getMessageReference().get().getMessage().get().getAuthor().getIdAsString();
-                    //gets the author id of the message that 'should' have the command response. This is the variable that stores the message that is requested to be deleted.
-
-                    String commandIssuer = mc.getMessage().getMessageReference().get().getMessage().get().getReferencedMessage().get().getAuthor().getIdAsString();
-                    //gets the author id of the command issuer. This is the variable that stores the author of the original command so only the author can delete their command response.
-
-                    //System.out.println(commandIssuer);
-                    //dont knock it if it works
-                    if (miatId.equals(self.getIdAsString()) && mc.getMessageAuthor().getIdAsString().equals(commandIssuer)) {
-                        DelOwn.delOwn(mc, api);
-                        mc.getMessage().delete();
-                    } else {
-                        mc.getMessage().reply("You cannot delete others' messages using this command.");
-                    }
-                    break;
-                case "purge":
-                    String amt = m.replace(prefix + "purge ","");
-                    mc.getMessage().reply(Purge.purge(mc, amt));
-                    Thread removeNotice = new Thread(() -> {
-                        Message notif = mc.getChannel().getMessages(1).join().getNewestMessage().get();
-                        try {
-                            Thread.sleep(10000);
-                        } catch (InterruptedException ex) {
-                            throw new RuntimeException(ex);
+                switch (command) {
+                    case "randfr":
+                        mc.getMessage().reply(RandFr.randomFriend());
+                        break;
+                    case "inspiro":
+                        mc.getMessage().reply(Inspiro.inspiro());
+                        break;
+                    case "godsays":
+                        mc.getMessage().reply(Godsays.godSays());
+                        break;
+                    case "miat":
+                        mc.getMessage().reply("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 17) + ".png?raw=true");
+                        break;
+                    case "base64":
+                        mc.getMessage().reply(Vase64.vase64(m));
+                        break;
+                    case "help":
+                        mc.getMessage().reply("Help is in the ``/miathelp`` slash command now!");
+                        break;
+                    case "setactivity":
+                        mc.getMessage().reply(SetActivity.setactivity(m, mc, api, prefix));
+                        break;
+                    case "animalfact":
+                        mc.getMessage().reply(AnimalFact.animalFact());
+                        break;
+                    case "wiki":
+                        mc.getMessage().reply(Wikipedia.randomArticle());
+                        break;
+                    case "uptime":
+                        mc.getMessage().reply(Uptime.uptime(startTime));
+                        break;
+                    case "joke":
+                        Random random = new Random();
+                        int randomNumber = random.nextInt(15);
+                        if (randomNumber == 0 || randomNumber == 1) {
+                            mc.addReactionsToMessage("\uD83E\uDDBA");
+                            mc.addReactionsToMessage("\uD83D\uDEE0️");
+                            mc.addReactionsToMessage("\uD83D\uDEA7");
+                            mc.addReactionsToMessage("\uD83D\uDC77");
+                            mc.getMessage().reply("https://cdn.discordapp.com/attachments/1100888255483875428/1123410595333537943/under_construction.mp4");
+                        } else {
+                            mc.getMessage().reply(RandomJoke.randomJoke());
                         }
-                        notif.delete();
-                    });
-                    removeNotice.start();
-                    break;
-                case "translate":
-                    String textToTranslate = m.replace(prefix + "translate ", "");
-                    mc.getMessage().reply(Trnsl.trnsl(translator, textToTranslate, Language.ENGLISH));
-                    break;
-                case "deepl":
-                    String deepLTextToTranslate = m.replace(prefix + "deepl ", "");
-                    mc.getMessage().reply(DeepL.deepl(deepLTranslator, deepLTextToTranslate,"en-US"));
-                    break;
-                //default:
-                //    mc.getChannel().sendMessage("Unknown command. Use ``/miathelp`` for a list of commands.");
-                //    break;
+                        break;
+                    case "qr":
+                        String data = m.replace(prefix + "qr ", "");
+                        mc.getMessage().reply(QRCodeCreate.qrCodeCreate(data));
+                        break;
+                    case "yc":
+                        String prompt = m.replace(prefix + "yc ", "");
+                        mc.addReactionsToMessage("\uD83D\uDCE8");
+
+                        Thread youThread = new Thread(() -> {
+                            YouChat.youChat(prompt, mc);
+                            mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDCE8");
+                        });
+                        youThread.start();
+                        break;
+                    case "topi":
+                        String topiPrompt = m.replace(prefix + "topi ", "");
+                        mc.addReactionsToMessage("\uD83C\uDFDE️");
+
+                        Thread topiThread = new Thread(() -> {
+                            KemoYou.kemoYou("Topi", topiPrompt, mc);
+                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                        });
+                        topiThread.start();
+                        break;
+                    case "serval":
+                        String servalPrompt = m.toLowerCase().replace(prefix + "serval ", "");
+                        mc.addReactionsToMessage("\uD83C\uDFDE️");
+
+                        Thread servalThread = new Thread(() -> {
+                            KemoYou.kemoYou("Serval", servalPrompt, mc);
+                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                        });
+                        servalThread.start();
+                        break;
+                    case "blackbuck":
+                        String blackbuckPrompt = m.toLowerCase().replace(prefix + "blackbuck ", "");
+                        mc.addReactionsToMessage("\uD83C\uDFDE️");
+
+                        Thread blackbuckThread = new Thread(() -> {
+                            KemoYou.kemoYou("Blackbuck", blackbuckPrompt, mc);
+                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                        });
+                        blackbuckThread.start();
+                        break;
+                    case "wolverine":
+                        String wolverinePrompt = m.toLowerCase().replace(prefix + "wolverine ", "");
+                        mc.addReactionsToMessage("\uD83C\uDFDE");
+
+                        Thread wolverineThread = new Thread(() -> {
+                            KemoYou.kemoYou("Wolverine", wolverinePrompt, mc);
+                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                        });
+                        wolverineThread.start();
+                        break;
+                    case "silverfox":
+                        String silverfoxPrompt = m.toLowerCase().replace(prefix + "silverfox ", "");
+                        mc.addReactionsToMessage("\uD83C\uDFDE");
+
+                        Thread silverfoxThread = new Thread(() -> {
+                            KemoYou.kemoYou("SilverFox", silverfoxPrompt, mc);
+                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                        });
+                        silverfoxThread.start();
+                        break;
+                    case "tact":
+                        String tactPrompt = m.toLowerCase().replace(prefix + "tact ", "");
+                        mc.addReactionsToMessage("\uD83D\uDE80");
+
+                        Thread tactThread = new Thread(() -> {
+                            KemoYou.kemoYou("Tact", tactPrompt, mc);
+                            mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
+                        });
+                        tactThread.start();
+                        break;
+                    case "bestclient":
+                        Color seppuku = new Color(153, 0, 238);
+                        EmbedBuilder e = new EmbedBuilder()
+                                .setTitle("Seppuku")
+                                .setDescription("Seppuku is one of the best clients of all time, ever!")
+                                .setAuthor("Seppuku", "https://github.com/seppukudevelopment/seppuku", "https://github.com/seppukudevelopment/seppuku/raw/master/res/seppuku_full.png")
+                                .addField("Seppuku Download", "https://github.com/seppukudevelopment/seppuku/releases")
+                                .addInlineField("Github", "https://github.com/seppukudevelopment/seppuku")
+                                .addInlineField("Website", "https://seppuku.pw")
+                                .setColor(seppuku)
+                                .setFooter("Seppuku", "https://github.com/seppukudevelopment/seppuku")
+                                .setImage("https://github.com/seppukudevelopment/seppuku/blob/master/res/seppuku_full.png?raw=true")
+                                .setThumbnail("https://github.com/seppukudevelopment/seppuku/blob/master/src/main/resources/assets/seppukumod/textures/seppuku-logo.png?raw=true");
+                        mc.getMessage().reply(e);
+                        break;
+                    case "remove":
+                        String miatId = mc.getMessage().getMessageReference().get().getMessage().get().getAuthor().getIdAsString();
+                        //gets the author id of the message that 'should' have the command response. This is the variable that stores the message that is requested to be deleted.
+
+                        String commandIssuer = mc.getMessage().getMessageReference().get().getMessage().get().getReferencedMessage().get().getAuthor().getIdAsString();
+                        //gets the author id of the command issuer. This is the variable that stores the author of the original command so only the author can delete their command response.
+
+                        //System.out.println(commandIssuer);
+                        //dont knock it if it works
+                        if (miatId.equals(self.getIdAsString()) && mc.getMessageAuthor().getIdAsString().equals(commandIssuer)) {
+                            DelOwn.delOwn(mc, api);
+                            mc.getMessage().delete();
+                        } else {
+                            mc.getMessage().reply("You cannot delete others' messages using this command.");
+                        }
+                        break;
+                    case "purge":
+                        String amt = m.replace(prefix + "purge ", "");
+                        mc.getMessage().reply(Purge.purge(mc, amt));
+                        Thread removeNotice = new Thread(() -> {
+                            Message notif = mc.getChannel().getMessages(1).join().getNewestMessage().get();
+                            try {
+                                Thread.sleep(10000);
+                            } catch (InterruptedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                            notif.delete();
+                        });
+                        removeNotice.start();
+                        break;
+                    case "translate":
+                        String textToTranslate = m.replace(prefix + "translate ", "");
+                        mc.getMessage().reply(Trnsl.trnsl(translator, textToTranslate, Language.ENGLISH));
+                        break;
+                    case "deepl":
+                        String deepLTextToTranslate = m.replace(prefix + "deepl ", "");
+                        mc.getMessage().reply(DeepL.deepl(deepLTranslator, deepLTextToTranslate, "en-US"));
+                        break;
+                }
             }
 
             if (m.toLowerCase().contains("nigg") || m.toLowerCase().contains("n1gg") || m.toLowerCase().contains("kotlin user")) {
@@ -442,8 +441,7 @@ public class MiatMain {
                    e.addField("\u200b", "'" + md.getMessageContent().get() + "' \n\n - " + time + "\n" + "Deleted in : " + md.getChannel().toString());
                    logChannel.asServerTextChannel().get().sendMessage(e);
                 }
-            } catch (NoSuchElementException nse) {
-                return;
+            } catch (NoSuchElementException ignored) {
             }
         });
 
