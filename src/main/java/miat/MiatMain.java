@@ -192,28 +192,9 @@ public class MiatMain {
                     }
                 }
             }
+
             if (m.startsWith(prefix)) {
                 System.out.println(m);
-            }
-
-            if (m.toLowerCase().startsWith(prefix + "ml on")) { //move to switch statement
-                String id = mc.getMessageAuthor().getIdAsString();
-                if (Whitelist.whitelisted(id)) {
-                    debugmessagelog = true;
-                    mc.getMessage().reply("Debug Message Log on.");
-                } else {
-                    mc.getMessage().reply("You are not on the debug whitelist.");
-                }
-            }
-
-            if (m.toLowerCase().startsWith(prefix + "ml off")) { //move to switch statement
-                String id = mc.getMessageAuthor().getIdAsString();
-                if (Whitelist.whitelisted(id)) {
-                    debugmessagelog = false;
-                    mc.getMessage().reply("Debug Message Log off.");
-                } else {
-                    mc.getMessage().reply("You are not on the debug whitelist.");
-                }
             }
 
             if (m.startsWith(prefix)) {
@@ -354,13 +335,14 @@ public class MiatMain {
                         mc.getMessage().reply(e);
                         break;
                     case "remove":
-                        String miatId = mc.getMessage().getMessageReference().get().getMessage().get().getAuthor().getIdAsString();
+                        //String miatId = mc.getMessage().getMessageReference().get().getMessage().get().getAuthor().getIdAsString();
                         //gets the author id of the message that 'should' have the command response. This is the variable that stores the message that is requested to be deleted.
+                        String miatId = mc.getMessage().requestReferencedMessage().get().join().getAuthor().getIdAsString();
 
-                        String commandIssuer = mc.getMessage().getMessageReference().get().getMessage().get().getReferencedMessage().get().getAuthor().getIdAsString();
+                        //String commandIssuer = mc.getMessage().getMessageReference().get().getMessage().get().getReferencedMessage().get().getAuthor().getIdAsString();
                         //gets the author id of the command issuer. This is the variable that stores the author of the original command so only the author can delete their command response.
+                        String commandIssuer = mc.getMessage().requestReferencedMessage().get().join().requestReferencedMessage().get().join().getAuthor().getIdAsString();
 
-                        //System.out.println(commandIssuer);
                         //dont knock it if it works
                         if (miatId.equals(self.getIdAsString()) && mc.getMessageAuthor().getIdAsString().equals(commandIssuer)) {
                             DelOwn.delOwn(mc, api);
@@ -390,6 +372,28 @@ public class MiatMain {
                     case "deepl":
                         String deepLTextToTranslate = m.replace(prefix + "deepl ", "");
                         mc.getMessage().reply(DeepL.deepl(deepLTranslator, deepLTextToTranslate, "en-US"));
+                        break;
+                    case "ml":
+                        String toggle = parts[1];
+                        String id = mc.getMessageAuthor().getIdAsString();
+                        switch (toggle) {
+                            case "on":
+                                if (Whitelist.whitelisted(id)) {
+                                    debugmessagelog = true;
+                                    mc.getMessage().reply("Debug Message Log on.");
+                                } else {
+                                    mc.getMessage().reply("You are not on the debug whitelist.");
+                                }
+                                break;
+                            case "off":
+                                if (Whitelist.whitelisted(id)) {
+                                    debugmessagelog = false;
+                                    mc.getMessage().reply("Debug Message Log off.");
+                                } else {
+                                    mc.getMessage().reply("You are not on the debug whitelist.");
+                                }
+                                break;
+                        }
                         break;
                 }
             }
@@ -477,7 +481,7 @@ public class MiatMain {
             switch(emoji) {
                 case "❌":
                     if (deleteCandidate.equals(self.getIdAsString())) { //self delete when X emoji is seen
-                        if (ra.requestMessage().join().getEmbeds().get(0).getTitle().toString().startsWith("Translated Text")) { //only delete if it is a translation message
+                        if (ra.requestMessage().join().getEmbeds().get(0).getTitle().get().startsWith("Translated Text")) { //only delete if it is a translation message
                             String del = ra.requestMessage().join().getIdAsString();
                             api.getMessageById(del, ra.getChannel()).join().delete();
                         }
