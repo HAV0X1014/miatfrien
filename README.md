@@ -6,7 +6,18 @@ A general purpose discord bot with a focus on fun!
 If you would like to see miat in action, it is available in this server.
 https://discord.gg/dHNund6jey
 
-### Features
+## Main Features
+
+### Translator
+Translate messages with flag emojis! React to a message with the country's flag of the language you want, and it will translate the content into that language. To use DeepL, react with a :regional_indicator_d: emoji and then the flag you wish. Remove translation messages with an :x: emoji.
+
+### Random Friend
+Use randfr to get a random Friend from japari-library.com! Returns the Friend as a link.
+
+### ReWords Points
+ReWords rewards users for saying words and phrases correctly, or can punish them for certain phrases. For every 'good phrase' said correctly, you earn a point and 'bad phrases' lose a point. The phrases are configurable, and supports exact match checking (ex. if "HAV0X" is set as an exact match phrase, "hav0x" will not earn a point.)
+
+## Features
 - `animalfact`: Get a random Animal Fact from factretriever.com.
 - `createqr`: Create a QR code with any string.
 - `inspiro`: Get an "inspirational" image.
