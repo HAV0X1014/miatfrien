@@ -19,7 +19,6 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.*;
 
 import java.awt.*;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -37,10 +36,15 @@ public class MiatMain {
     static boolean useGoogleAsFallbackForDeepL = Boolean.parseBoolean(ConfigHandler.getString("UseGoogleTranslateAsFallbackForDeepL"));
     static String deepLKey = ConfigHandler.getString("DeepLKey");
     static String[] ignoredChannels = ConfigHandler.getArray("TranslatorFlagIgnoredChannels");
+    static String[] reWordsGoodWords = ConfigHandler.getArray("ReWordsGoodWords");
+    static String[] reWordsGoodWordsExactMatch = ConfigHandler.getArray("ReWordsGoodWordsExactMatch");
+    static String[] reWordsBadWords = ConfigHandler.getArray("ReWordsBadWords");
+    static String[] reWordsBadWordsExactMatch = ConfigHandler.getArray("ReWordsBadWordsExactMatch");
+    static Boolean registerSlashCommands = Boolean.valueOf(ConfigHandler.getString("RegisterSlashCommands"));
 
     public static void main(String[] args) {
         DiscordApi api = new DiscordApiBuilder().setToken(token).setAllIntents().login().join();
-        System.out.println("Miat logged in.");
+        System.out.println(botName + " logged in.");
         int startTime = (int) (System.currentTimeMillis() / 1000);
         User self = api.getYourself();
         String time = new Date().toString();
@@ -48,31 +52,35 @@ public class MiatMain {
         Translator translator = new Translator(); //google translate object
         com.deepl.api.Translator deepLTranslator = new com.deepl.api.Translator(deepLKey); //deepL translator object
 
-        api.updateActivity(ActivityType.PLAYING,"Miat has Flag Translation!");
+        api.updateActivity(ActivityType.PLAYING, botName + " has Flag Translation!");
 
-        //SlashCommand.with("ping", "Check if the bot is up.").createGlobal(api).join();
-        //SlashCommand.with("uptime", "Get the uptime of the bot.").createGlobal(api).join();
-        //SlashCommand.with("purge","Delete the specified number of messages.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Messages", "Amount of messages to delete.", true))).createGlobal(api).join();
-        //SlashCommand.with("delete","Delete the specified message by ID.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "MessageID", "MessageID of the message you want to delete.", true))).createGlobal(api).join();
-        //SlashCommand.with("pfp","Get the avatar of a member.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER, "User","The user's PFP you want.", false))).createGlobal(api).join();
-        //SlashCommand.with("serverinfo","Get info about the server.").createGlobal(api).join();
-        //SlashCommand.with("setlogchannel","Set the deleted message log channel.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.CHANNEL, "Channel", "The channel you want to log deleted messages to.", true))).createGlobal(api).join();
-        //SlashCommand.with("ban","Ban the specified user.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER,"User", "The user to ban.",true))).createGlobal(api).join();
-        //SlashCommand.with("kick","Kick the specified user.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER,"User","User to kick.", true))).createGlobal(api).join();
-        //SlashCommand.with("miathelp","Show help for the selected category.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND, "fun","Shows a list of fun commands.", false), SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND,"utility","Shows a list of utility commands.", false))).createGlobal(api).join();
-        //SlashCommand.with("invite","Get an invite link for this bot with permissions needed to function.").createGlobal(api).join();
+        if (registerSlashCommands) {
+            System.out.println("Registering slash commands...");
+            SlashCommand.with("ping", "Check if the bot is up.").createGlobal(api).join();
+            SlashCommand.with("uptime", "Get the uptime of the bot.").createGlobal(api).join();
+            SlashCommand.with("purge","Delete the specified number of messages.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Messages", "Amount of messages to delete.", true))).createGlobal(api).join();
+            SlashCommand.with("delete","Delete the specified message by ID.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "MessageID", "MessageID of the message you want to delete.", true))).createGlobal(api).join();
+            SlashCommand.with("pfp","Get the avatar of a member.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER, "User","The user's PFP you want.", false))).createGlobal(api).join();
+            SlashCommand.with("serverinfo","Get info about the server.").createGlobal(api).join();
+            SlashCommand.with("setlogchannel","Set the deleted message log channel.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.CHANNEL, "Channel", "The channel you want to log deleted messages to.", true))).createGlobal(api).join();
+            SlashCommand.with("ban","Ban the specified user.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER,"User", "The user to ban.",true))).createGlobal(api).join();
+            SlashCommand.with("kick","Kick the specified user.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER,"User","User to kick.", true))).createGlobal(api).join();
+            SlashCommand.with("miathelp","Show help for the selected category.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND, "fun","Shows a list of fun commands.", false), SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND,"utility","Shows a list of utility commands.", false))).createGlobal(api).join();
+            SlashCommand.with("invite","Get an invite link for this bot with permissions needed to function.").createGlobal(api).join();
 
-        //SlashCommand.with("wiki","Get a random Wikipedia article.").createGlobal(api).join();
-        //SlashCommand.with("pointcheck","Check your V0Xpoints, the top overall, or another user's points.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER, "user", "User to check. (Use <@ (userID) > to check across servers).",false), SlashCommandOption.create(SlashCommandOptionType.BOOLEAN,"top","See the top 5 earners."))).createGlobal(api).join();
-        //SlashCommand.with("inspiro","Get an \"inspirational\" post").createGlobal(api).join();
-        //SlashCommand.with("randfr","Get a random Kemono Friends character article from Japari Library.").createGlobal(api).join();
-        //SlashCommand.with("godsays","Get the latest word from god, courtesy of Terry A. Davis.").createGlobal(api).join();
-        //SlashCommand.with("miat","Get an image of a Miat(a).").createGlobal(api).join();
-        //SlashCommand.with("youchat","Ask you.com/chat (YouChat) a question.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Prompt", "The prompt you wish to ask YouChat.",true))).createGlobal(api).join();
-        //SlashCommand.with("animalfact","Get a random animal fact.").createGlobal(api).join();
-        //SlashCommand.with("joke","Get a random joke from jokeapi.dev.").createGlobal(api).join();
-        //SlashCommand.with("createqr","Create a QR code with goqr.me.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING,"Data","Data to encode into the QR code.", true))).createGlobal(api).join();
+            SlashCommand.with("wiki","Get a random Wikipedia article.").createGlobal(api).join();
+            SlashCommand.with("pointcheck","Check your ReWords points, the top overall, or another user's points.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER, "user", "User to check. (Use <@ (userID) > to check across servers).",false), SlashCommandOption.create(SlashCommandOptionType.BOOLEAN,"top","See the top 5 earners."))).createGlobal(api).join();
+            SlashCommand.with("inspiro","Get an \"inspirational\" post").createGlobal(api).join();
+            SlashCommand.with("randfr","Get a random Kemono Friends character article from Japari Library.").createGlobal(api).join();
+            SlashCommand.with("godsays","Get the latest word from god, courtesy of Terry A. Davis.").createGlobal(api).join();
+            SlashCommand.with("miat","Get an image of a Miat(a).").createGlobal(api).join();
+            SlashCommand.with("youchat","Ask you.com/chat (YouChat) a question.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Prompt", "The prompt you wish to ask YouChat.",true))).createGlobal(api).join();
+            SlashCommand.with("animalfact","Get a random animal fact.").createGlobal(api).join();
+            SlashCommand.with("joke","Get a random joke from jokeapi.dev.").createGlobal(api).join();
+            SlashCommand.with("createqr","Create a QR code with goqr.me.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING,"Data","Data to encode into the QR code.", true))).createGlobal(api).join();
 
+            System.out.println("SLASH COMMANDS REGISTERED! Set \"RegisterSlashCommands\" to \"false\" in config.json!");
+        }
         /*
         String slashCommandID = "1100917267182669944";
             try {
@@ -126,13 +134,13 @@ public class MiatMain {
                 //fun commands below
                 case "pointcheck":
                     if (interaction.getArgumentUserValueByIndex(0).isPresent()) {
-                        V0XpointChecker.user(interaction);
+                        ReWordsPointChecker.user(interaction);
                     }
                     if (interaction.getArgumentBooleanValueByIndex(0).isPresent()) {
-                        V0XpointChecker.top(interaction);
+                        ReWordsPointChecker.top(interaction);
                     }
                     if (!interaction.getOptionByIndex(0).isPresent()) {
-                        V0XpointChecker.pointCheck(interaction);
+                        ReWordsPointChecker.pointCheck(interaction);
                     }
                     break;
                 case "wiki":
@@ -177,7 +185,7 @@ public class MiatMain {
             }
         });
 
-        //legacy commands and V0Xpoints
+        //legacy commands and ReWords
         api.addMessageCreateListener(mc -> {
             String m = mc.getMessageContent();
             String author = mc.getMessageAuthor().toString();
@@ -343,7 +351,6 @@ public class MiatMain {
                         //gets the author id of the command issuer. This is the variable that stores the author of the original command so only the author can delete their command response.
                         String commandIssuer = mc.getMessage().requestReferencedMessage().get().join().requestReferencedMessage().get().join().getAuthor().getIdAsString();
 
-                        //dont knock it if it works
                         if (miatId.equals(self.getIdAsString()) && mc.getMessageAuthor().getIdAsString().equals(commandIssuer)) {
                             DelOwn.delOwn(mc, api);
                             mc.getMessage().delete();
@@ -398,38 +405,31 @@ public class MiatMain {
                 }
             }
 
+            for (String wordsGoodWordsExactMatch : reWordsGoodWordsExactMatch) {
+                if (m.contains(wordsGoodWordsExactMatch)) {
+                    ReWords.scoreModifier(mc, 1);
+                }
+            }
+            for (String reWordsGoodWord : reWordsGoodWords) {
+                if (m.toLowerCase().contains(reWordsGoodWord)) {
+                    ReWords.scoreModifier(mc, 1);
+                }
+            }
+            for (String wordsBadWordsExactMatch : reWordsBadWordsExactMatch) {
+                if (m.contains(wordsBadWordsExactMatch)) {
+                    ReWords.scoreModifier(mc, -1);
+                }
+            }
+            for (String reWordsBadWord : reWordsBadWords) {
+                if (m.toLowerCase().contains(reWordsBadWord)) {
+                    ReWords.scoreModifier(mc, -1);
+                }
+            }
+
+            //this is hardcoded and will stay hardcoded because i find it funny when people get told to not say the n word.
+            //i dont even care about the word itself, its funny to see people act tough against a bot when they say a word.
             if (m.toLowerCase().contains("nigg") || m.toLowerCase().contains("n1gg") || m.toLowerCase().contains("kotlin user")) {
                 mc.getChannel().sendMessage("__**Racial slurs are discouraged!**__");
-            } else
-
-            if (m.contains("HAV0X")) {
-                int up = 1;
-                V0Xpoints.hV0Xpoints(mc, api, up);
-            } else
-
-            if (m.toLowerCase().contains("topi")) {
-                int up = 1;
-                V0Xpoints.hV0Xpoints(mc, api, up);
-            } else
-
-            if (m.toLowerCase().contains("grey")) {
-                int up = 1;
-                V0Xpoints.hV0Xpoints(mc, api, up);
-            } else
-
-            if (m.toLowerCase().contains("seppuku")) {
-                int up = 1;
-                V0Xpoints.hV0Xpoints(mc, api, up);
-            } else
-
-            if (m.toLowerCase().contains("havox") || m.toLowerCase().contains("habox") || m.toLowerCase().contains("havowox") || m.toLowerCase().contains("have cocks") || m.toLowerCase().contains("havix")) {
-                int down = -1;
-                V0Xpoints.hV0Xpoints(mc, api, down);
-            } else
-
-            if (m.toLowerCase().contains("i like kotlin")) {
-                int down = -1;
-                V0Xpoints.hV0Xpoints(mc, api, down);
             }
         });
 
@@ -460,7 +460,7 @@ public class MiatMain {
             User me = api.getYourself();
             EmbedBuilder join = new EmbedBuilder();
             join.setAuthor(me);
-            join.setTitle("Hello, Miat Fren is here!");
+            join.setTitle("Hello," + botName + " is here!");
             join.setThumbnail("https://cdn.discordapp.com/attachments/919786447488290816/920839787789836288/miat.jpeg");
             join.addField("Information :", "Slash Commands are supported! \nPrefix : ``" + prefix +"``\nCreator : ``HAV0X#1009`` & ``arsonfrog#9475``");
             join.addField("Get Started :", "Help : ``/miathelp``\nSet Deleted Message Log Channel : ``/setlogchannel``");

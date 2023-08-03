@@ -4,6 +4,13 @@ import java.util.Arrays;
 
 public class Whitelist {
     public static boolean whitelisted(String userID) {
-        return userID.contains(Arrays.toString(ConfigHandler.getArray("Whitelist")));
+        String[] whitelistedMembersArray = ConfigHandler.getArray("Whitelist");
+        boolean whitelisted = false;
+        String whitelistedMembers = Arrays.toString(whitelistedMembersArray);
+        if (whitelistedMembers.contains(userID)) {
+            whitelisted = true;
+        }
+
+        return whitelisted;
     }
 }
