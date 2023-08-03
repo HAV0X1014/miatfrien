@@ -8,10 +8,15 @@
     "DeepLKey": "",
     "DeepLEmoji": "\uD83C\uDDE9",
     "UseGoogleTranslateAsFallbackForDeepL": "true",
+    "RegisterSlashCommands": "true",
 
     "BetterAPIKey": "",
     "Whitelist": ["",""],
-    "WebhookURL": ""
+    "WebhookURL": "",
+    
+    "ReWordsGoodWords": ["",""],
+    "ReWordsGoodWordsExactMatch": ["",""],
+    "ReWordsBadWords": ["",""],
+    "ReWordsBadWordsExactMatch": ["",""]
   }
 }
-
