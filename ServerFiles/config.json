@@ -13,6 +13,7 @@
     "BetterAPIKey": "",
     "Whitelist": ["",""],
     "WebhookURL": "",
+    "StatusText": "",
     
     "ReWordsGoodWords": ["",""],
     "ReWordsGoodWordsExactMatch": ["",""],
