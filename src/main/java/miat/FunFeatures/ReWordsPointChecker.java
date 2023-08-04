@@ -80,6 +80,5 @@ public class ReWordsPointChecker {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 }

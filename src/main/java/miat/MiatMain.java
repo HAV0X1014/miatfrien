@@ -31,16 +31,17 @@ public class MiatMain {
     static String token = ConfigHandler.getString("Token");
     static String prefix = ConfigHandler.getString("Prefix");
     static String botName = ConfigHandler.getString("BotName");
-    static boolean deeplEnabled = Boolean.parseBoolean(ConfigHandler.getString("DeepLEnabled"));
+    static Boolean deeplEnabled = ConfigHandler.getBoolean("DeepLEnabled");
     static String deepLEmoji = ConfigHandler.getString("DeepLEmoji");
-    static boolean useGoogleAsFallbackForDeepL = Boolean.parseBoolean(ConfigHandler.getString("UseGoogleTranslateAsFallbackForDeepL"));
+    static Boolean useGoogleAsFallbackForDeepL = ConfigHandler.getBoolean("UseGoogleTranslateAsFallbackForDeepL");
     static String deepLKey = ConfigHandler.getString("DeepLKey");
     static String[] ignoredChannels = ConfigHandler.getArray("TranslatorFlagIgnoredChannels");
     static String[] reWordsGoodWords = ConfigHandler.getArray("ReWordsGoodWords");
     static String[] reWordsGoodWordsExactMatch = ConfigHandler.getArray("ReWordsGoodWordsExactMatch");
     static String[] reWordsBadWords = ConfigHandler.getArray("ReWordsBadWords");
     static String[] reWordsBadWordsExactMatch = ConfigHandler.getArray("ReWordsBadWordsExactMatch");
-    static Boolean registerSlashCommands = Boolean.valueOf(ConfigHandler.getString("RegisterSlashCommands"));
+    static Boolean registerSlashCommands = ConfigHandler.getBoolean("RegisterSlashCommands");
+    static String statusText = ConfigHandler.getString("StatusText");
 
     public static void main(String[] args) {
         DiscordApi api = new DiscordApiBuilder().setToken(token).setAllIntents().login().join();
@@ -52,10 +53,10 @@ public class MiatMain {
         Translator translator = new Translator(); //google translate object
         com.deepl.api.Translator deepLTranslator = new com.deepl.api.Translator(deepLKey); //deepL translator object
 
-        api.updateActivity(ActivityType.PLAYING, botName + " has Flag Translation!");
+        api.updateActivity(ActivityType.PLAYING, statusText);
 
         if (registerSlashCommands) {
-            System.out.println("Registering slash commands...");
+            System.out.println("Registering slash commands. This will take some time...");
             SlashCommand.with("ping", "Check if the bot is up.").createGlobal(api).join();
             SlashCommand.with("uptime", "Get the uptime of the bot.").createGlobal(api).join();
             SlashCommand.with("purge","Delete the specified number of messages.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Messages", "Amount of messages to delete.", true))).createGlobal(api).join();
@@ -67,6 +68,8 @@ public class MiatMain {
             SlashCommand.with("kick","Kick the specified user.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER,"User","User to kick.", true))).createGlobal(api).join();
             SlashCommand.with("miathelp","Show help for the selected category.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND, "fun","Shows a list of fun commands.", false), SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND,"utility","Shows a list of utility commands.", false))).createGlobal(api).join();
             SlashCommand.with("invite","Get an invite link for this bot with permissions needed to function.").createGlobal(api).join();
+            SlashCommand.with("translate","Translate text with Google Translate into the desired language.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "source", "The text you want to translate.", true), SlashCommandOption.create(SlashCommandOptionType.STRING, "target", "The language you want the text in. (Currently not implemented)", false))).createGlobal(api).join();
+            SlashCommand.with("deepl","Translate text with DeepL Translator into the desired language.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "source", "The text you want to translate.", true), SlashCommandOption.create(SlashCommandOptionType.STRING, "target", "The language you want the text in. (Currently not implemented)", false))).createGlobal(api).join();
 
             SlashCommand.with("wiki","Get a random Wikipedia article.").createGlobal(api).join();
             SlashCommand.with("pointcheck","Check your ReWords points, the top overall, or another user's points.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER, "user", "User to check. (Use <@ (userID) > to check across servers).",false), SlashCommandOption.create(SlashCommandOptionType.BOOLEAN,"top","See the top 5 earners."))).createGlobal(api).join();
@@ -78,6 +81,7 @@ public class MiatMain {
             SlashCommand.with("animalfact","Get a random animal fact.").createGlobal(api).join();
             SlashCommand.with("joke","Get a random joke from jokeapi.dev.").createGlobal(api).join();
             SlashCommand.with("createqr","Create a QR code with goqr.me.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING,"Data","Data to encode into the QR code.", true))).createGlobal(api).join();
+            SlashCommand.with("8ball","Ask a question to the intelligent 8ball.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING,"question", "The question you want answered.",true))).createGlobal(api).join();
 
             System.out.println("SLASH COMMANDS REGISTERED! Set \"RegisterSlashCommands\" to \"false\" in config.json!");
         }
@@ -130,6 +134,20 @@ public class MiatMain {
                 case "invite":
                     interaction.createImmediateResponder().setContent(api.createBotInvite(admin)).setFlags(MessageFlag.EPHEMERAL).respond();
                     break;
+                case "translate":
+                    interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                        interactionOriginalResponseUpdater.setContent("").addEmbed(Trnsl.trnsl(translator, interaction.getArgumentStringValueByName("source").get(), Language.ENGLISH)).update();
+                    });
+                    break;
+                case "deepl":
+                    interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                        if (deeplEnabled) {
+                            interactionOriginalResponseUpdater.setContent("").addEmbed(DeepL.deepl(deepLTranslator, interaction.getArgumentStringValueByName("source").get(), "en-US")).update();
+                        } else {
+                            interactionOriginalResponseUpdater.setContent("DeepL translation is disabled.").setFlags(MessageFlag.EPHEMERAL).update();
+                        }
+                    });
+                    break;
 
                 //fun commands below
                 case "pointcheck":
@@ -181,6 +199,9 @@ public class MiatMain {
                     interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
                         interactionOriginalResponseUpdater.setContent("").addEmbed(QRCodeCreate.qrCodeCreate(data)).update();
                     });
+                    break;
+                case "8ball":
+                    interaction.createImmediateResponder().setContent("").addEmbed(EightBall.eightBall(interaction.getArgumentStringValueByName("question").get())).respond();
                     break;
             }
         });
@@ -329,26 +350,11 @@ public class MiatMain {
                         break;
                     case "bestclient":
                         Color seppuku = new Color(153, 0, 238);
-                        EmbedBuilder e = new EmbedBuilder()
-                                .setTitle("Seppuku")
-                                .setDescription("Seppuku is one of the best clients of all time, ever!")
-                                .setAuthor("Seppuku", "https://github.com/seppukudevelopment/seppuku", "https://github.com/seppukudevelopment/seppuku/raw/master/res/seppuku_full.png")
-                                .addField("Seppuku Download", "https://github.com/seppukudevelopment/seppuku/releases")
-                                .addInlineField("Github", "https://github.com/seppukudevelopment/seppuku")
-                                .addInlineField("Website", "https://seppuku.pw")
-                                .setColor(seppuku)
-                                .setFooter("Seppuku", "https://github.com/seppukudevelopment/seppuku")
-                                .setImage("https://github.com/seppukudevelopment/seppuku/blob/master/res/seppuku_full.png?raw=true")
-                                .setThumbnail("https://github.com/seppukudevelopment/seppuku/blob/master/src/main/resources/assets/seppukumod/textures/seppuku-logo.png?raw=true");
+                        EmbedBuilder e = new EmbedBuilder().setTitle("Seppuku").setDescription("Seppuku is one of the best clients of all time, ever!").setAuthor("Seppuku", "https://github.com/seppukudevelopment/seppuku", "https://github.com/seppukudevelopment/seppuku/raw/master/res/seppuku_full.png").addField("Seppuku Download", "https://github.com/seppukudevelopment/seppuku/releases").addInlineField("Github", "https://github.com/seppukudevelopment/seppuku").addInlineField("Website", "https://seppuku.pw").setColor(seppuku).setFooter("Seppuku", "https://github.com/seppukudevelopment/seppuku").setImage("https://github.com/seppukudevelopment/seppuku/blob/master/res/seppuku_full.png?raw=true").setThumbnail("https://github.com/seppukudevelopment/seppuku/blob/master/src/main/resources/assets/seppukumod/textures/seppuku-logo.png?raw=true");
                         mc.getMessage().reply(e);
                         break;
                     case "remove":
-                        //String miatId = mc.getMessage().getMessageReference().get().getMessage().get().getAuthor().getIdAsString();
-                        //gets the author id of the message that 'should' have the command response. This is the variable that stores the message that is requested to be deleted.
                         String miatId = mc.getMessage().requestReferencedMessage().get().join().getAuthor().getIdAsString();
-
-                        //String commandIssuer = mc.getMessage().getMessageReference().get().getMessage().get().getReferencedMessage().get().getAuthor().getIdAsString();
-                        //gets the author id of the command issuer. This is the variable that stores the author of the original command so only the author can delete their command response.
                         String commandIssuer = mc.getMessage().requestReferencedMessage().get().join().requestReferencedMessage().get().join().getAuthor().getIdAsString();
 
                         if (miatId.equals(self.getIdAsString()) && mc.getMessageAuthor().getIdAsString().equals(commandIssuer)) {
@@ -377,8 +383,15 @@ public class MiatMain {
                         mc.getMessage().reply(Trnsl.trnsl(translator, textToTranslate, Language.ENGLISH));
                         break;
                     case "deepl":
-                        String deepLTextToTranslate = m.replace(prefix + "deepl ", "");
-                        mc.getMessage().reply(DeepL.deepl(deepLTranslator, deepLTextToTranslate, "en-US"));
+                        if (deeplEnabled) {
+                            String deepLTextToTranslate = m.replace(prefix + "deepl ", "");
+                            mc.getMessage().reply(DeepL.deepl(deepLTranslator, deepLTextToTranslate, "en-US"));
+                        } else {
+                            mc.getMessage().reply("DeepL translation is not enabled.");
+                        }
+                        break;
+                    case "8ball":
+                        mc.getMessage().reply(EightBall.eightBall(m));
                         break;
                     case "ml":
                         String toggle = parts[1];

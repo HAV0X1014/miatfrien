@@ -57,4 +57,20 @@ public class ConfigHandler {
 
         return values;
     }
+    public static boolean getBoolean(String option) {
+        String filePath = "ServerFiles/config.json";
+        String fullText = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                fullText += line;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        //why didnt i just use ReadFull for miat???? i have no idea and im not going to change it now
+
+        JSONObject obj = new JSONObject(fullText);
+        return obj.getJSONObject("Config").getBoolean(option);
+    }
 }

@@ -1,5 +1,6 @@
 package miat.UtilityCommands;
 
+import miat.FileHandlers.ConfigHandler;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.interaction.SlashCommandInteraction;
 
@@ -7,6 +8,7 @@ import java.awt.*;
 
 public class Help {
     public static EmbedBuilder help(SlashCommandInteraction interaction) {
+        String prefix = ConfigHandler.getString("Prefix");
         String page = interaction.getFullCommandName().toLowerCase();
         Color seppuku = new Color(153,0,238);
         EmbedBuilder e = new EmbedBuilder();
@@ -14,27 +16,30 @@ public class Help {
         switch (page) {
             case "miathelp fun":
                 e.setTitle("Fun Features");
+                e.setDescription("All Slash commands are also Legacy commands unless otherwise listed.");
                 e.addInlineField("__**Slash Commands**__", "\n``animalfact``: Get a random Animal Fact from factretriever.com." +
-                        "\n\n``createqr``: Create a QR code with any string." +
+                        "\n\n``createqr``: Create a QR code from any string." +
                         "\n\n``godsays``: Get the latest word from God, courtesy of Terry A. Davis." +
                         "\n\n``inspiro``: Get an \"inspirational\" image." +
                         "\n\n``joke``: Get a random joke from JokeAPI.dev." +
-                        "\n\n``pointcheck``: Check your own balance of V0Xpoints, the top 5 earners, or another user's balance. \n-Increase your score by saying specific phrases." +
+                        "\n\n``pointcheck``: Check your ReWords points, the top 5 earners, or another user's balance. \n-Increase your score by saying specific phrases. (Slash command only)" +
                         "\n\n``randfr``: Get a random Kemono Friends character article." +
-                        "\n\n``wiki``: Get a random wikipedia article" +
+                        "\n\n``wiki``: Get a random wikipedia article." +
+                        "\n\n``8ball``: Ask the intelligent 8 ball a question." +
+                        "\n\n``translate``: Use Google Translate to translate text into english." +
+                        "\n\n``deepl``: Use DeepL Translate to translate text into english." +
                         "\n\n``miat``: run it and figure it out");
-                e.addInlineField("__**Legacy Commands**__","\n``[base64 [encode|decode] [text]``: Encodes or Decodes the supplied text." +
-                        "\n\n``[qr``: Create a QR code with any string." +
-                        "\n\n``[joke``: Get a random joke from JokeAPI.dev." +
-                        "\n\n``[yc``: Ask You.com's chat AI a question." +
-                        "\n\n``[serval``: Ask Serval from Kemono Friends a question." +
-                        "\n\n``[blackbuck``: Ask Blackbuck from Kemono Friends a question." +
-                        "\n\n``[topi``: Ask Topi from Kemono Friends a question." +
-                        "\n\n``[silverfox``: Ask Silver Fox from Kemono Friends a question. (much smarter and better with technical topics)." +
-                        "\n\n``[wolverine``: Ask Wolverine from Kemono Friends a question." +
-                        "\n\n``[bestclient``: Informs you about the best client." +
+                e.addInlineField("__**Legacy Commands**__","\n``"+ prefix +"base64 [encode|decode] [text]``: Encodes or Decodes the supplied text." +
+                        "\n\n``"+ prefix +"qr``: Create a QR code with any string." +
+                        "\n\n``"+ prefix +"yc``: Ask You.com's chat AI a question." +
+                        "\n\n``"+ prefix +"serval``: Ask Serval from Kemono Friends a question." +
+                        "\n\n``"+ prefix +"blackbuck``: Ask Blackbuck from Kemono Friends a question." +
+                        "\n\n``"+ prefix +"topi``: Ask Topi from Kemono Friends a question." +
+                        "\n\n``"+ prefix +"silverfox``: Ask Silver Fox from Kemono Friends a question. (much smarter and better with technical topics)." +
+                        "\n\n``"+ prefix +"wolverine``: Ask Wolverine from Kemono Friends a question." +
+                        "\n\n``"+ prefix +"bestclient``: Informs you about the best client." +
                 "\n\n __*All AI features powered by YouChat and api.BetterAPI.net*__");
-                e.setFooter("Created By : HAV0X#1009 & arsonfrog#9475");
+                e.setFooter("Created By : HAV0X (@hav0x) & arsonfrog (@arsonbot)");
                 e.setColor(Color.orange);
                 break;
 
@@ -52,8 +57,10 @@ public class Help {
                 "\n\n``kick``: Kick the specified user." +
                 "\n\n``miathelp``: Get help with the bot." +
                 "\n\n``invite`` : Get an invite for the bot with all permissions needed.");
-                e.addInlineField("__**Legacy Commands**__", "``[ml [on|off]``: Enable or Disable the Debug Message Log. Default off.");
-                e.setFooter("Created By : HAV0X#1009 & arsonfrog#9475");
+                e.addInlineField("__**Legacy Commands**__", "``" + prefix+ "ml [on|off]``: Enable or Disable the Debug Message Log. Default off. **(Whitelisted members only.)**" +
+                        "\n\n``" + prefix + "setactivity``: Set the status of the bot. **(Whitelisted members only.)**" +
+                        "\n\n``" + prefix + "remove``: Removes the bot's message only if it is replying to you. Reply to the message you want removed.");
+                e.setFooter("Created By : HAV0X (@hav0x) & arsonfrog (@arsonbot)");
                 e.setColor(seppuku);
                 break;
 
