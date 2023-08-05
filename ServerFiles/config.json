@@ -1,14 +1,15 @@
 {
   "Config": {
     "Token": "",
-    "BotName": "this setting is unused",
+    "BotName": "CHANGE BOT NAME",
     "Prefix": "[",
     "TranslatorFlagIgnoredChannels": ["",""],
     "DeepLEnabled": true,
-    "DeepLKey": "",
+    "DeepLKey": "0",
     "DeepLEmoji": "\uD83C\uDDE9",
     "UseGoogleTranslateAsFallbackForDeepL": true,
     "RegisterSlashCommands": true,
+    "RegisterApps": true,
 
     "BetterAPIKey": "",
     "Whitelist": ["",""],
