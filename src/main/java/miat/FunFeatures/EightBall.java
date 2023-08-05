@@ -11,7 +11,7 @@ public class EightBall {
         String fortune = null;
         Random random = new Random();
 
-        if (content.toLowerCase().contains("should ")) {
+        if (content.toLowerCase().contains("should ") || content.toLowerCase().contains("shall ")) {
             int randomIntShould = random.nextInt(10);
             switch (randomIntShould) {
                 case 0:
@@ -81,7 +81,7 @@ public class EightBall {
                     break;
             }
         }
-        if (content.toLowerCase().contains("can ")) {
+        if (content.toLowerCase().contains("can ") || content.toLowerCase().contains("could ") || content.toLowerCase().contains("may ")) {
             int randomIntCan = random.nextInt(10);
             switch (randomIntCan) {
                 case 0:
@@ -116,7 +116,7 @@ public class EightBall {
                     break;
                 }
             }
-        if (content.toLowerCase().contains("when ")) {
+        if (content.toLowerCase().contains("when ") || content.toLowerCase().contains("might ")) {
             int randomIntWhen = random.nextInt(10);
             switch (randomIntWhen) {
                 case 0:
@@ -186,7 +186,7 @@ public class EightBall {
                     break;
             }
         }
-        if (content.toLowerCase().contains("do ") || content.toLowerCase().contains("does ")) {
+        if (content.toLowerCase().contains("do ") || content.toLowerCase().contains("does ") || content.toLowerCase().contains("did ")) {
             int randomIntDo = random.nextInt(10);
             switch (randomIntDo) {
                 case 0:

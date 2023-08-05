@@ -42,6 +42,7 @@ public class MiatMain {
     static String[] reWordsBadWordsExactMatch = ConfigHandler.getArray("ReWordsBadWordsExactMatch");
     static Boolean registerSlashCommands = ConfigHandler.getBoolean("RegisterSlashCommands");
     static String statusText = ConfigHandler.getString("StatusText");
+    static boolean registerApps = ConfigHandler.getBoolean("RegisterApps");
 
     public static void main(String[] args) {
         DiscordApi api = new DiscordApiBuilder().setToken(token).setAllIntents().login().join();
@@ -51,6 +52,7 @@ public class MiatMain {
         String time = new Date().toString();
         Permissions admin = new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build();
         Translator translator = new Translator(); //google translate object
+        if (deepLKey == null) deepLKey = "0";
         com.deepl.api.Translator deepLTranslator = new com.deepl.api.Translator(deepLKey); //deepL translator object
 
         api.updateActivity(ActivityType.PLAYING, statusText);
@@ -85,6 +87,13 @@ public class MiatMain {
 
             System.out.println("SLASH COMMANDS REGISTERED! Set \"RegisterSlashCommands\" to \"false\" in config.json!");
         }
+
+        if (registerApps) {
+            System.out.println("Registering Apps. (The things that show up when you right click a message) This may take a while...");
+            MessageContextMenu.with("Translate - Google Translate").createGlobal(api).join();
+            MessageContextMenu.with("Translate - DeepL").createGlobal(api).join();
+            System.out.println("**Apps Registered!** Set \"RegisterApps\" to false in config.json!");
+        }
         /*
         String slashCommandID = "1100917267182669944";
             try {
@@ -95,6 +104,29 @@ public class MiatMain {
                 throw new RuntimeException(e);
             }
         */
+
+        //Application commands (apps)
+        api.addMessageContextMenuCommandListener(event -> {
+            MessageContextMenuInteraction interaction = event.getMessageContextMenuInteraction();
+            String command = interaction.getCommandName();
+
+            switch(command) {
+                case "Translate - DeepL":
+                    interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                        if (deeplEnabled) {
+                            interactionOriginalResponseUpdater.setContent("").addEmbed(DeepL.deepl(deepLTranslator, interaction.getTarget().getContent(), "en-US")).setFlags(MessageFlag.EPHEMERAL).update();
+                        } else {
+                            interactionOriginalResponseUpdater.setContent("DeepL translation is disabled.").update();
+                        }
+                    });
+                    break;
+                case "Translate - Google Translate":
+                    interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
+                        interactionOriginalResponseUpdater.setContent("").addEmbed(Trnsl.trnsl(translator,interaction.getTarget().getContent(), Language.ENGLISH)).setFlags(MessageFlag.EPHEMERAL).update();
+                    });
+                    break;
+            }
+        });
 
         //slash commands
         api.addSlashCommandCreateListener(event -> {
