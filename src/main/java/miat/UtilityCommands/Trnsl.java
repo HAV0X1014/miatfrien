@@ -17,7 +17,7 @@ public class Trnsl {
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Translated Text - Google Translate");
         e.setColor(new Color(46,125,50));
-        e.setFooter(tr.getSourceLanguage() + " -> " + tr.getTargetLanguage());
+        e.setFooter(tr.getSourceLanguage() + " -> " + tr.getTargetLanguage() + "\n(Use ❌ to remove this message.)");
         e.setDescription(translatedText);
 
         return e;

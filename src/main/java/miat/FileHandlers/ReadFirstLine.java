@@ -8,7 +8,7 @@ public class ReadFirstLine {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(filepath));
             line = reader.readLine();
-
+            reader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

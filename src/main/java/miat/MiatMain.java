@@ -10,8 +10,11 @@ import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.message.mention.AllowedMentions;
+import org.javacord.api.entity.message.mention.AllowedMentionsBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Permissions;
 import org.javacord.api.entity.permission.PermissionsBuilder;
@@ -28,21 +31,22 @@ import java.util.Random;
 
 public class MiatMain {
     static boolean debugmessagelog;
-    static String token = ConfigHandler.getString("Token");
-    static String prefix = ConfigHandler.getString("Prefix");
-    static String botName = ConfigHandler.getString("BotName");
-    static Boolean deeplEnabled = ConfigHandler.getBoolean("DeepLEnabled");
-    static String deepLEmoji = ConfigHandler.getString("DeepLEmoji");
-    static Boolean useGoogleAsFallbackForDeepL = ConfigHandler.getBoolean("UseGoogleTranslateAsFallbackForDeepL");
-    static String deepLKey = ConfigHandler.getString("DeepLKey");
-    static String[] ignoredChannels = ConfigHandler.getArray("TranslatorFlagIgnoredChannels");
-    static String[] reWordsGoodWords = ConfigHandler.getArray("ReWordsGoodWords");
-    static String[] reWordsGoodWordsExactMatch = ConfigHandler.getArray("ReWordsGoodWordsExactMatch");
-    static String[] reWordsBadWords = ConfigHandler.getArray("ReWordsBadWords");
-    static String[] reWordsBadWordsExactMatch = ConfigHandler.getArray("ReWordsBadWordsExactMatch");
-    static Boolean registerSlashCommands = ConfigHandler.getBoolean("RegisterSlashCommands");
-    static String statusText = ConfigHandler.getString("StatusText");
-    static boolean registerApps = ConfigHandler.getBoolean("RegisterApps");
+    public static String configFile = ReadFull.read("ServerFiles/config.json");
+    static String token = ConfigHandler.getString("Token", configFile);
+    static String prefix = ConfigHandler.getString("Prefix", configFile);
+    static String botName = ConfigHandler.getString("BotName", configFile);
+    static Boolean deeplEnabled = ConfigHandler.getBoolean("DeepLEnabled", configFile);
+    static String deepLEmoji = ConfigHandler.getString("DeepLEmoji", configFile);
+    static Boolean useGoogleAsFallbackForDeepL = ConfigHandler.getBoolean("UseGoogleTranslateAsFallbackForDeepL", configFile);
+    static String deepLKey = ConfigHandler.getString("DeepLKey", configFile);
+    static String[] ignoredChannels = ConfigHandler.getArray("TranslatorFlagIgnoredChannels", configFile);
+    static String[] reWordsGoodWords = ConfigHandler.getArray("ReWordsGoodWords", configFile);
+    static String[] reWordsGoodWordsExactMatch = ConfigHandler.getArray("ReWordsGoodWordsExactMatch", configFile);
+    static String[] reWordsBadWords = ConfigHandler.getArray("ReWordsBadWords", configFile);
+    static String[] reWordsBadWordsExactMatch = ConfigHandler.getArray("ReWordsBadWordsExactMatch", configFile);
+    static Boolean registerSlashCommands = ConfigHandler.getBoolean("RegisterSlashCommands", configFile);
+    static String statusText = ConfigHandler.getString("StatusText", configFile);
+    static boolean registerApps = ConfigHandler.getBoolean("RegisterApps", configFile);
 
     public static void main(String[] args) {
         DiscordApi api = new DiscordApiBuilder().setToken(token).setAllIntents().login().join();
@@ -54,6 +58,7 @@ public class MiatMain {
         Translator translator = new Translator(); //google translate object
         if (deepLKey == null) deepLKey = "0";
         com.deepl.api.Translator deepLTranslator = new com.deepl.api.Translator(deepLKey); //deepL translator object
+        AllowedMentions noReplyPing = new AllowedMentionsBuilder().setMentionRepliedUser(false).build();
 
         api.updateActivity(ActivityType.PLAYING, statusText);
 
@@ -79,7 +84,7 @@ public class MiatMain {
             SlashCommand.with("randfr","Get a random Kemono Friends character article from Japari Library.").createGlobal(api).join();
             SlashCommand.with("godsays","Get the latest word from god, courtesy of Terry A. Davis.").createGlobal(api).join();
             SlashCommand.with("miat","Get an image of a Miat(a).").createGlobal(api).join();
-            SlashCommand.with("youchat","Ask you.com/chat (YouChat) a question.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Prompt", "The prompt you wish to ask YouChat.",true))).createGlobal(api).join();
+            //SlashCommand.with("youchat","Ask you.com/chat (YouChat) a question.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Prompt", "The prompt you wish to ask YouChat.",true))).createGlobal(api).join();
             SlashCommand.with("animalfact","Get a random animal fact.").createGlobal(api).join();
             SlashCommand.with("joke","Get a random joke from jokeapi.dev.").createGlobal(api).join();
             SlashCommand.with("createqr","Create a QR code with goqr.me.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING,"Data","Data to encode into the QR code.", true))).createGlobal(api).join();
@@ -116,7 +121,7 @@ public class MiatMain {
                         if (deeplEnabled) {
                             interactionOriginalResponseUpdater.setContent("").addEmbed(DeepL.deepl(deepLTranslator, interaction.getTarget().getContent(), "en-US")).setFlags(MessageFlag.EPHEMERAL).update();
                         } else {
-                            interactionOriginalResponseUpdater.setContent("DeepL translation is disabled.").update();
+                            interactionOriginalResponseUpdater.setContent("DeepL translation is disabled.").setFlags(MessageFlag.EPHEMERAL).update();
                         }
                     });
                     break;
@@ -243,11 +248,13 @@ public class MiatMain {
             String m = mc.getMessageContent();
             String author = mc.getMessageAuthor().toString();
             String server = mc.getServer().get().toString();
+            //MessageBuilder replyNoPing = new MessageBuilder().setAllowedMentions(noReplyPing).replyTo(mc.getMessage());
+            //unused for now, maybe implement a no ping option later?
 
             if (debugmessagelog) {
                 if (!mc.getMessageAuthor().equals(self) && !mc.getMessageAuthor().toString().equals("MessageAuthor (id: 919786500890173441, name: Miat Bot)")) {
                     try {
-                        Webhook.send(ConfigHandler.getString("WebhookURL"), "'" + m + "'\n\n- " + author + "\n- At " + time + " \n- " + server);
+                        Webhook.send(ConfigHandler.getString("WebhookURL", configFile), "'" + m + "'\n\n- " + author + "\n- At " + time + " \n- " + server);
                     } catch (IOException e1) {
                         e1.printStackTrace();
                     }
@@ -310,7 +317,9 @@ public class MiatMain {
                         String data = m.replace(prefix + "qr ", "");
                         mc.getMessage().reply(QRCodeCreate.qrCodeCreate(data));
                         break;
-                    case "yc":
+                    //All youchat AI has been disabled.
+
+                    /* case "yc":
                         String prompt = m.replace(prefix + "yc ", "");
                         mc.addReactionsToMessage("\uD83D\uDCE8");
 
@@ -379,7 +388,7 @@ public class MiatMain {
                             mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
                         });
                         tactThread.start();
-                        break;
+                        break; */
                     case "bestclient":
                         Color seppuku = new Color(153, 0, 238);
                         EmbedBuilder e = new EmbedBuilder().setTitle("Seppuku").setDescription("Seppuku is one of the best clients of all time, ever!").setAuthor("Seppuku", "https://github.com/seppukudevelopment/seppuku", "https://github.com/seppukudevelopment/seppuku/raw/master/res/seppuku_full.png").addField("Seppuku Download", "https://github.com/seppukudevelopment/seppuku/releases").addInlineField("Github", "https://github.com/seppukudevelopment/seppuku").addInlineField("Website", "https://seppuku.pw").setColor(seppuku).setFooter("Seppuku", "https://github.com/seppukudevelopment/seppuku").setImage("https://github.com/seppukudevelopment/seppuku/blob/master/res/seppuku_full.png?raw=true").setThumbnail("https://github.com/seppukudevelopment/seppuku/blob/master/src/main/resources/assets/seppukumod/textures/seppuku-logo.png?raw=true");
@@ -425,26 +434,63 @@ public class MiatMain {
                     case "8ball":
                         mc.getMessage().reply(EightBall.eightBall(m));
                         break;
+                    case "supermagicnumber":
+                    case "magicnumber":
+                        if (parts.length > 1) {
+                            String numbers = parts[1].replaceAll("[^0-9]","");
+                            mc.getMessage().reply(SuperMagicNumber.superMagic(numbers));
+                        } else {
+                            mc.getMessage().reply(SuperMagicNumber.superMagic(mc.getMessageAuthor().getIdAsString()));
+                        }
+                        break;
+                    case "spiritfriend":
+                        if (parts.length > 1) {
+                            String numbers = parts[1].replaceAll("[^0-9]", "");
+                            mc.getMessage().reply(SpiritFriend.spiritFriend(numbers));
+                        } else {
+                            mc.getMessage().reply(SpiritFriend.spiritFriend(mc.getMessageAuthor().getIdAsString()));
+                        }
+                        break;
+                    case "fotw":
+                    case "friendoftheweek":
+                        if (parts.length > 1) {
+                            String numbers = parts[1].replaceAll("[^0-9]","");
+                            mc.getMessage().reply(SpiritFriend.friendOfTheWeek(numbers));
+                        } else {
+                            mc.getMessage().reply(SpiritFriend.friendOfTheWeek(mc.getMessageAuthor().getIdAsString()));
+                        }
+                        break;
+                    case "collatz":
+                        if (parts.length > 1) {
+                            String number = parts[1].replaceAll("[^0-9]","");
+                            mc.getMessage().reply(Collatz.collatz(number));
+                        } else {
+                            Random ran = new Random();
+                            int number = ran.nextInt(100000000);
+                            mc.getMessage().reply(Collatz.collatz(String.valueOf(number)));
+                        }
                     case "ml":
-                        String toggle = parts[1];
-                        String id = mc.getMessageAuthor().getIdAsString();
-                        switch (toggle) {
-                            case "on":
-                                if (Whitelist.whitelisted(id)) {
-                                    debugmessagelog = true;
-                                    mc.getMessage().reply("Debug Message Log on.");
-                                } else {
-                                    mc.getMessage().reply("You are not on the debug whitelist.");
-                                }
-                                break;
-                            case "off":
-                                if (Whitelist.whitelisted(id)) {
-                                    debugmessagelog = false;
-                                    mc.getMessage().reply("Debug Message Log off.");
-                                } else {
-                                    mc.getMessage().reply("You are not on the debug whitelist.");
-                                }
-                                break;
+                        if (parts.length > 1) {
+                            String toggle = parts[1];
+                            String id = mc.getMessageAuthor().getIdAsString();
+                            switch (toggle) {
+                                case "on":
+                                    if (Whitelist.whitelisted(id)) {
+                                        debugmessagelog = true;
+                                        mc.getMessage().reply("Debug Message Log on.");
+                                    } else {
+                                        mc.getMessage().reply("You are not on the debug whitelist.");
+                                    }
+                                    break;
+                                case "off":
+                                    if (Whitelist.whitelisted(id)) {
+                                        debugmessagelog = false;
+                                        mc.getMessage().reply("Debug Message Log off.");
+                                    } else {
+                                        mc.getMessage().reply("You are not on the debug whitelist.");
+                                    }
+                                    break;
+                            }
                         }
                         break;
                 }
@@ -473,7 +519,7 @@ public class MiatMain {
 
             //this is hardcoded and will stay hardcoded because i find it funny when people get told to not say the n word.
             //i dont even care about the word itself, its funny to see people act tough against a bot when they say a word.
-            if (m.toLowerCase().contains("nigg") || m.toLowerCase().contains("n1gg") || m.toLowerCase().contains("kotlin user")) {
+            if (m.toLowerCase().contains("nigg") || m.toLowerCase().contains("n1gg") || m.toLowerCase().contains("kotlin user") || m.toLowerCase().contains("hewwo")) {
                 mc.getChannel().sendMessage("__**Racial slurs are discouraged!**__");
             }
         });
@@ -513,8 +559,15 @@ public class MiatMain {
         });
 
         api.addReactionAddListener(ra -> {
+            //disallow the reply messages of emoji translations to ping people.
+            /*
+            Note to self, this code is what sends the translated text while also replying to the original untranslated message without pinging
+            new MessageBuilder().setAllowedMentions(noReplyPing).setEmbed(Trnsl.trnsl(translator, messageContent, targetLang)).replyTo(ra.requestMessage().join()).send(ra.requestMessage().join().getChannel())
+            setAllowedMentions() makes it to the reply doesnt ping, replyTo() sets the message to be replied to, and send() sets the channel to send the message in.
+            why doesn't javacord just have a .replyNoPing() ?????????????????
+            */
             String emoji = ra.getEmoji().asUnicodeEmoji().orElse("");
-            String allemoji = ra.requestMessage().join().getReactions().toString();
+            String allEmoji = ra.requestMessage().join().getReactions().toString();
 
             String messageContent = ra.requestMessage().join().getContent();
 
@@ -634,22 +687,23 @@ public class MiatMain {
                     return;
             }
             if (!Arrays.toString(ignoredChannels).contains(ra.requestMessage().join().getChannel().getIdAsString())) { //if IgnoredChannels does NOT include the reaction channel, continue
-                if (allemoji.contains(deepLEmoji)) {
+                if (allEmoji.contains(deepLEmoji)) {
                     if (deeplEnabled) { //Check for the DeepL emoji (the one that says to use DeepL if reacted)
                         if (dlLang == null) { //some languages aren't on DeepL. If the language isn't supported, it will be null because it wasn't set in the switch case
                             if (useGoogleAsFallbackForDeepL) { //if DeepL isn't able to translate into the language, use Google as a fallback translator.
-                                ra.getChannel().sendMessage(Trnsl.trnsl(translator, messageContent, targetLang));
+                                AllowedMentions none = new AllowedMentionsBuilder().setMentionRepliedUser(true).build();
+                                new MessageBuilder().setAllowedMentions(noReplyPing).setEmbed(Trnsl.trnsl(translator, messageContent, targetLang)).replyTo(ra.requestMessage().join()).send(ra.requestMessage().join().getChannel());
                             } else {
                                 ra.getChannel().sendMessage("This language is not supported by DeepL.");
                             }
                         } else {
-                            ra.getChannel().sendMessage(DeepL.deepl(deepLTranslator, messageContent, dlLang)); //Translate if successful
+                            new MessageBuilder().setAllowedMentions(noReplyPing).setEmbed(DeepL.deepl(deepLTranslator, messageContent, dlLang)).replyTo(ra.requestMessage().join()).send(ra.requestMessage().join().getChannel()); //Translate if successful
                         }
                     } else {
-                        ra.getChannel().sendMessage(Trnsl.trnsl(translator, messageContent, targetLang)); //use Google if DeepL isnt enabled.
+                        new MessageBuilder().setAllowedMentions(noReplyPing).setEmbed(Trnsl.trnsl(translator, messageContent, targetLang)).replyTo(ra.requestMessage().join()).send(ra.requestMessage().join().getChannel()); //use Google if DeepL isnt enabled.
                     }
                 } else {
-                    ra.getChannel().sendMessage(Trnsl.trnsl(translator, messageContent, targetLang)); //use Google if there isnt a DeepL emoji.
+                    new MessageBuilder().setAllowedMentions(noReplyPing).setEmbed(Trnsl.trnsl(translator, messageContent, targetLang)).replyTo(ra.requestMessage().join()).send(ra.requestMessage().join().getChannel()); //use Google if there isnt a DeepL emoji.
                 }
             }
         });

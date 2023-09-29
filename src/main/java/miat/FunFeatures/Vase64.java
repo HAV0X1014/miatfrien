@@ -1,10 +1,8 @@
 package miat.FunFeatures;
 
-import miat.MiatMain;
-
 import java.io.UnsupportedEncodingException;
 
-public class Vase64 extends MiatMain {    // apparently you cant name things in java "Base64" with a capital B. so we get Vase64 instead
+public class Vase64 {    // apparently you cant name things in java "Base64" with a capital B. so we get Vase64 instead
 
     public static String vase64(String m) {
         String returnString = "Decode/Encode Error.";

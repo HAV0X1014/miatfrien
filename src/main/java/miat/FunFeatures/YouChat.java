@@ -1,7 +1,6 @@
 package miat.FunFeatures;
 
 import miat.FileHandlers.ConfigHandler;
-import miat.FileHandlers.ReadFirstLine;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -14,6 +13,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
+import static miat.MiatMain.configFile;
+
 public class YouChat {
     public static void youChat(String prompt, MessageCreateEvent mc) {
         OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(30,TimeUnit.SECONDS).build();
@@ -24,7 +25,7 @@ public class YouChat {
         URL url = null;
         int code;
         try {
-            url = new URL("https://api.betterapi.net/youchat?inputs=" + prompt + "&key=" + ConfigHandler.getString("BetterAPIKey"));
+            url = new URL("https://api.betterapi.net/youchat?inputs=" + prompt + "&key=" + ConfigHandler.getString("BetterAPIKey", configFile));
             Request request = new Request.Builder().url(url).build();
 
             String responseContent;

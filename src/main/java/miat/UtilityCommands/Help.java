@@ -6,9 +6,11 @@ import org.javacord.api.interaction.SlashCommandInteraction;
 
 import java.awt.*;
 
+import static miat.MiatMain.configFile;
+
 public class Help {
     public static EmbedBuilder help(SlashCommandInteraction interaction) {
-        String prefix = ConfigHandler.getString("Prefix");
+        String prefix = ConfigHandler.getString("Prefix", configFile);
         String page = interaction.getFullCommandName().toLowerCase();
         Color seppuku = new Color(153,0,238);
         EmbedBuilder e = new EmbedBuilder();

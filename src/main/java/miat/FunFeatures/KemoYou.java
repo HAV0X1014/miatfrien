@@ -1,7 +1,6 @@
 package miat.FunFeatures;
 
 import miat.FileHandlers.ConfigHandler;
-import miat.FileHandlers.ReadFirstLine;
 import miat.FileHandlers.ReadFull;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -15,6 +14,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
+import static miat.MiatMain.configFile;
+
 public class KemoYou {
     public static void kemoYou(String character, String prompt, MessageCreateEvent mc) {
         OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(30,TimeUnit.SECONDS).build();
@@ -25,7 +26,7 @@ public class KemoYou {
         URL url = null;
         int code;
         try {
-            url = new URL("https://api.betterapi.net/youchat?inputs=" + ReadFull.read("ServerFiles/KemoYouPrompts/" + character + ".txt") + prompt + "&key=" + ConfigHandler.getString("BetterAPIKey"));
+            url = new URL("https://api.betterapi.net/youchat?inputs=" + ReadFull.read("ServerFiles/KemoYouPrompts/" + character + ".txt") + prompt + "&key=" + ConfigHandler.getString("BetterAPIKey", configFile));
             Request request = new Request.Builder().url(url).build();
 
             String responseContent;

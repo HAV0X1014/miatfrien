@@ -21,7 +21,7 @@ public class DeepL {
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Translated Text - DeepL");
         e.setColor(Color.CYAN);
-        e.setFooter(translatedText.getDetectedSourceLanguage() + " -> " + targetLang);
+        e.setFooter(translatedText.getDetectedSourceLanguage() + " -> " + targetLang + "\n(Use ❌ to remove this message.)");
         e.setDescription(translatedText.getText());
 
         return e;

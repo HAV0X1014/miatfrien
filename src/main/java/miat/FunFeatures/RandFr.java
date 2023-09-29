@@ -22,7 +22,7 @@ public class RandFr {
                 "Beast_King_Lion", "Lion_(Beast_King)", "Logikoma", "Beast_King_Mongoose", "Mongoose_(Beast_King)", "Mukku", "Beast_King_Old_World_Vulture",
                 "Old_World_Vulture_(Beast_King)", "Beast_King_Ostrich", "Ostrich_(Beast_King)", "Palcoarai-san", "Palcoarai-san2", "Rabbit_Yukine", "Seal_Brown_Horse",
                 "Slow_Loris", "Tachikoma_Type-A", "Tachikoma_Type-B", "Tachikoma_Type-C", "Tachikoma_Type-H",
-                "Tachikoma_Type-S", "Tamama", "Tommy", "Uchikoma", "Unico", "Valcoara", "White_Horse", "Beast_King_Wildebeest",
+                "Tachikoma_Type-S", "Tamama", "Tommy", "Uchikoma", "Unico", "Valcoara", "White_Horse", "White_Ezo_Red_Fox", "Beast_King_Wildebeest",
                 "Wildebeest_(Beast_King)", "Witch", "Beast_King_Zebra", "Zebra_(Beast_King)"};
         String line;
         StringBuffer responseContent = new StringBuffer();
