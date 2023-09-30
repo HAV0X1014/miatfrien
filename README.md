@@ -28,8 +28,6 @@ ReWords rewards users for saying words and phrases correctly, or can punish them
 - `miat`: run it and find out.
 - `[translate` : Translate a string from nearly any language into English.
 - Flag 2 Translate : Add a flag emoji to translate the message into that language.
-- `[yc`: Ask You.com's YouChat AI a question.
-- Ability to emulate several characters from Kemono Friends (Serval, Blackbuck, Topi, Wolverine, Silver Fox).
 - `[bestclient`: Informs you about the [best client](https://seppuku.pw/).
 - Debug whitelist members are able to execute some utility commands.
 - `purge`: Purge the desired amount of messages.
