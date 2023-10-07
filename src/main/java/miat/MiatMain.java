@@ -265,6 +265,19 @@ public class MiatMain {
                 System.out.println(m);
             }
 
+            if (mc.getMessage().getReferencedMessage().isPresent()) {
+                if (mc.getMessage().getReferencedMessage().get().getUserAuthor().get().equals(self)) {
+                    String prompt = m;
+                    String character = mc.getMessage().getReferencedMessage().get().getEmbeds().get(0).getAuthor().get().getName();
+                    mc.addReactionsToMessage("\uD83C\uDFDE️");
+                    Thread aiThread = new Thread(() -> {
+                        OobaboogaAI.aiRequest(prompt, mc, character);
+                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                    });
+                    aiThread.start();
+                }
+            }
+
             if (m.startsWith(prefix)) {
                 String[] parts = m.split(" ", 2);
                 String command = parts[0].toLowerCase().replace(prefix, "");
@@ -313,82 +326,106 @@ public class MiatMain {
                             mc.getMessage().reply(RandomJoke.randomJoke());
                         }
                         break;
+                    case "traverse":
+                        System.out.println(ReplyTraverse.traverseReplies(mc, api));
+                        break;
                     case "qr":
                         String data = m.replace(prefix + "qr ", "");
                         mc.getMessage().reply(QRCodeCreate.qrCodeCreate(data));
                         break;
-                    //All youchat AI has been disabled.
-
-                    /* case "yc":
-                        String prompt = m.replace(prefix + "yc ", "");
+                    case "tact":
                         mc.addReactionsToMessage("\uD83D\uDCE8");
-
                         Thread youThread = new Thread(() -> {
-                            YouChat.youChat(prompt, mc);
+                            OobaboogaAI.aiRequest(parts[1], mc, "Tact");
                             mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDCE8");
                         });
                         youThread.start();
                         break;
+                    case "cleck":
+                        mc.addReactionsToMessage("\uD83D\uDE80");
+                        Thread cleckThread = new Thread(() -> {
+                            OobaboogaAI.aiRequest(parts[1], mc, "Cleck");
+                            mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
+                        });
+                        cleckThread.start();
+                        break;
                     case "topi":
-                        String topiPrompt = m.replace(prefix + "topi ", "");
+                    case "ttt":
                         mc.addReactionsToMessage("\uD83C\uDFDE️");
-
                         Thread topiThread = new Thread(() -> {
-                            KemoYou.kemoYou("Topi", topiPrompt, mc);
+                            OobaboogaAI.aiRequest(parts[1], mc, "Topi");
                             mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
                         });
                         topiThread.start();
                         break;
                     case "serval":
-                        String servalPrompt = m.toLowerCase().replace(prefix + "serval ", "");
                         mc.addReactionsToMessage("\uD83C\uDFDE️");
-
                         Thread servalThread = new Thread(() -> {
-                            KemoYou.kemoYou("Serval", servalPrompt, mc);
+                            OobaboogaAI.aiRequest(parts[1], mc, "Serval");
                             mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
                         });
                         servalThread.start();
                         break;
                     case "blackbuck":
-                        String blackbuckPrompt = m.toLowerCase().replace(prefix + "blackbuck ", "");
                         mc.addReactionsToMessage("\uD83C\uDFDE️");
-
                         Thread blackbuckThread = new Thread(() -> {
-                            KemoYou.kemoYou("Blackbuck", blackbuckPrompt, mc);
+                            OobaboogaAI.aiRequest(parts[1], mc, "Blackbuck");
                             mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
                         });
                         blackbuckThread.start();
                         break;
-                    case "wolverine":
-                        String wolverinePrompt = m.toLowerCase().replace(prefix + "wolverine ", "");
+                    case "coyote":
                         mc.addReactionsToMessage("\uD83C\uDFDE");
-
+                        Thread coyoteThread = new Thread(() ->{
+                            OobaboogaAI.aiRequest(parts[1], mc, "Coyote");
+                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE");
+                        });
+                        coyoteThread.start();
+                        break;
+                    case "northerngoshawk":
+                    case "goshawk":
+                    case "northy":
+                        mc.addReactionsToMessage("\uD83E\uDEB6");
+                        Thread northernGoshawkThread = new Thread(() -> {
+                           OobaboogaAI.aiRequest(parts[1],mc, "Northern Goshawk");
+                           mc.removeOwnReactionByEmojiFromMessage("\uD83E\uDEB6");
+                        });
+                        northernGoshawkThread.start();
+                        break;
+                    case "wolverine":
+                        mc.addReactionsToMessage("\uD83C\uDFDE");
                         Thread wolverineThread = new Thread(() -> {
-                            KemoYou.kemoYou("Wolverine", wolverinePrompt, mc);
+                            OobaboogaAI.aiRequest(parts[1], mc, "Wolverine");
                             mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
                         });
                         wolverineThread.start();
                         break;
                     case "silverfox":
-                        String silverfoxPrompt = m.toLowerCase().replace(prefix + "silverfox ", "");
                         mc.addReactionsToMessage("\uD83C\uDFDE");
-
                         Thread silverfoxThread = new Thread(() -> {
-                            KemoYou.kemoYou("SilverFox", silverfoxPrompt, mc);
+                            OobaboogaAI.aiRequest(parts[1], mc, "Silver Fox");
                             mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
                         });
                         silverfoxThread.start();
                         break;
-                    case "tact":
-                        String tactPrompt = m.toLowerCase().replace(prefix + "tact ", "");
-                        mc.addReactionsToMessage("\uD83D\uDE80");
-
-                        Thread tactThread = new Thread(() -> {
-                            KemoYou.kemoYou("Tact", tactPrompt, mc);
-                            mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
+                    case "tarpan":
+                        mc.addReactionsToMessage("\uD83D\uDD8C\uFE0F");
+                        Thread tarpanThread = new Thread(() -> {
+                            OobaboogaAI.aiRequest(parts[1], mc, "Tarpan");
+                            mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDD8C\uFE0F");
                         });
-                        tactThread.start();
-                        break; */
+                        tarpanThread.start();
+                        break;
+                    case "cheeto":
+                    case "cheetah":
+                    case "notpronghorn":
+                        mc.addReactionsToMessage("\uD83D\uDC08");
+                        Thread cheetahThread = new Thread(() -> {
+                           OobaboogaAI.aiRequest(parts[1],mc,"Cheetah");
+                           mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDC08");
+                        });
+                        cheetahThread.start();
+                        break;
                     case "bestclient":
                         Color seppuku = new Color(153, 0, 238);
                         EmbedBuilder e = new EmbedBuilder().setTitle("Seppuku").setDescription("Seppuku is one of the best clients of all time, ever!").setAuthor("Seppuku", "https://github.com/seppukudevelopment/seppuku", "https://github.com/seppukudevelopment/seppuku/raw/master/res/seppuku_full.png").addField("Seppuku Download", "https://github.com/seppukudevelopment/seppuku/releases").addInlineField("Github", "https://github.com/seppukudevelopment/seppuku").addInlineField("Website", "https://seppuku.pw").setColor(seppuku).setFooter("Seppuku", "https://github.com/seppukudevelopment/seppuku").setImage("https://github.com/seppukudevelopment/seppuku/blob/master/res/seppuku_full.png?raw=true").setThumbnail("https://github.com/seppukudevelopment/seppuku/blob/master/src/main/resources/assets/seppukumod/textures/seppuku-logo.png?raw=true");
