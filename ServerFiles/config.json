@@ -10,8 +10,7 @@
     "UseGoogleTranslateAsFallbackForDeepL": true,
     "RegisterSlashCommands": true,
     "RegisterApps": true,
-
-    "BetterAPIKey": "",
+    
     "Whitelist": ["",""],
     "WebhookURL": "",
     "StatusText": "",
