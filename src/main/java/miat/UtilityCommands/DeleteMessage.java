@@ -6,6 +6,7 @@ import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.permission.PermissionType;
+import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.SlashCommandInteraction;
 
 import java.util.regex.Matcher;
@@ -33,6 +34,32 @@ public class DeleteMessage {
             }
         } else {
             interaction.createImmediateResponder().setContent("You do not have MANAGE_MESSAGES permissions, oops!").setFlags(MessageFlag.EPHEMERAL).respond();
+        }
+    }
+    public static String deleteOwnCommandResponse(MessageCreateEvent mc) {
+        Message message = mc.getMessage();
+        DiscordApi api = mc.getApi();
+        if (message.getMessageReference().isPresent()) {
+            String repliedToMessage = message.getMessageReference().get().getMessageId().get().toString();
+            Message deleteCandidate = api.getMessageById(repliedToMessage, mc.getChannel()).join();
+            if (deleteCandidate.getAuthor().asUser().get().equals(api.getYourself())) {
+                if (deleteCandidate.getMessageReference().isPresent()) {
+                    String commandIssueMessage = deleteCandidate.getMessageReference().get().getMessageId().get().toString();
+                    Message commandIssuer = api.getMessageById(commandIssueMessage, mc.getChannel()).join();
+                    if (commandIssuer.getAuthor().equals(message.getAuthor())) {
+                        api.getMessageById(repliedToMessage, mc.getChannel()).join().delete();
+                        return "Deleted message.";
+                    } else {
+                        return "You cannot delete others' messages with this command.";
+                    }
+                } else {
+                    return "The command to delete has no author.";
+                }
+            } else {
+                return "You cannot delete messages that didn't come from the bot with this command.";
+            }
+        } else {
+            return "Reply to your command response you want deleted.";
         }
     }
 }

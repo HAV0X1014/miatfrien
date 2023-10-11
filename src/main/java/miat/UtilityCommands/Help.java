@@ -1,11 +1,13 @@
 package miat.UtilityCommands;
 
 import miat.FileHandlers.ConfigHandler;
+import miat.FileHandlers.GetCharacter;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.interaction.SlashCommandInteraction;
 
 import java.awt.*;
 
+import static miat.MiatMain.characterList;
 import static miat.MiatMain.configFile;
 
 public class Help {
@@ -33,12 +35,6 @@ public class Help {
                         "\n\n``miat``: run it and figure it out");
                 e.addInlineField("__**Legacy Commands**__","\n``"+ prefix +"base64 [encode|decode] [text]``: Encodes or Decodes the supplied text." +
                         "\n\n``"+ prefix +"qr``: Create a QR code with any string." +
-                        "\n\n``"+ prefix +"yc``: Ask You.com's chat AI a question." +
-                        "\n\n``"+ prefix +"serval``: Ask Serval from Kemono Friends a question." +
-                        "\n\n``"+ prefix +"blackbuck``: Ask Blackbuck from Kemono Friends a question." +
-                        "\n\n``"+ prefix +"topi``: Ask Topi from Kemono Friends a question." +
-                        "\n\n``"+ prefix +"silverfox``: Ask Silver Fox from Kemono Friends a question. (much smarter and better with technical topics)." +
-                        "\n\n``"+ prefix +"wolverine``: Ask Wolverine from Kemono Friends a question." +
                         "\n\n``"+ prefix +"bestclient``: Informs you about the best client." +
                 "\n\n __*All AI features powered by YouChat and api.BetterAPI.net*__");
                 e.setFooter("Created By : HAV0X (@hav0x) & arsonfrog (@arsonbot)");
@@ -64,6 +60,13 @@ public class Help {
                         "\n\n``" + prefix + "remove``: Removes the bot's message only if it is replying to you. Reply to the message you want removed.");
                 e.setFooter("Created By : HAV0X (@hav0x) & arsonfrog (@arsonbot)");
                 e.setColor(seppuku);
+                break;
+
+            case "miathelp ai":
+                e.setTitle("AI features");
+                e.setDescription("AI features are locally hosted and run. Specific model used may vary.\n\nTo continue a chat, reply to the last message sent by a character.");
+                e.addField("Characters", GetCharacter.getList(characterList));
+                e.setColor(Color.CYAN);
                 break;
 
             default:

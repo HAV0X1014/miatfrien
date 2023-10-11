@@ -28,12 +28,14 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 public class MiatMain {
     static boolean debugmessagelog;
     public static String configFile = ReadFull.read("ServerFiles/config.json");
+    public static String characterList = ReadFull.read("ServerFiles/characterList.json");
     static String token = ConfigHandler.getString("Token", configFile);
-    static String prefix = ConfigHandler.getString("Prefix", configFile);
+    public static String prefix = ConfigHandler.getString("Prefix", configFile);
     static String botName = ConfigHandler.getString("BotName", configFile);
     static Boolean deeplEnabled = ConfigHandler.getBoolean("DeepLEnabled", configFile);
     static String deepLEmoji = ConfigHandler.getString("DeepLEmoji", configFile);
@@ -73,7 +75,7 @@ public class MiatMain {
             SlashCommand.with("setlogchannel","Set the deleted message log channel.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.CHANNEL, "Channel", "The channel you want to log deleted messages to.", true))).createGlobal(api).join();
             SlashCommand.with("ban","Ban the specified user.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER,"User", "The user to ban.",true))).createGlobal(api).join();
             SlashCommand.with("kick","Kick the specified user.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER,"User","User to kick.", true))).createGlobal(api).join();
-            SlashCommand.with("miathelp","Show help for the selected category.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND, "fun","Shows a list of fun commands.", false), SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND,"utility","Shows a list of utility commands.", false))).createGlobal(api).join();
+            SlashCommand.with("miathelp","Show help for the selected category.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND, "fun","Shows a list of fun commands.", false), SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND,"utility","Shows a list of utility commands.", false), SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND,"ai","Shows info about the AI features.",false))).createGlobal(api).join();
             SlashCommand.with("invite","Get an invite link for this bot with permissions needed to function.").createGlobal(api).join();
             SlashCommand.with("translate","Translate text with Google Translate into the desired language.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "source", "The text you want to translate.", true), SlashCommandOption.create(SlashCommandOptionType.STRING, "target", "The language you want the text in. (Currently not implemented)", false))).createGlobal(api).join();
             SlashCommand.with("deepl","Translate text with DeepL Translator into the desired language.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "source", "The text you want to translate.", true), SlashCommandOption.create(SlashCommandOptionType.STRING, "target", "The language you want the text in. (Currently not implemented)", false))).createGlobal(api).join();
@@ -84,7 +86,6 @@ public class MiatMain {
             SlashCommand.with("randfr","Get a random Kemono Friends character article from Japari Library.").createGlobal(api).join();
             SlashCommand.with("godsays","Get the latest word from god, courtesy of Terry A. Davis.").createGlobal(api).join();
             SlashCommand.with("miat","Get an image of a Miat(a).").createGlobal(api).join();
-            //SlashCommand.with("youchat","Ask you.com/chat (YouChat) a question.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Prompt", "The prompt you wish to ask YouChat.",true))).createGlobal(api).join();
             SlashCommand.with("animalfact","Get a random animal fact.").createGlobal(api).join();
             SlashCommand.with("joke","Get a random joke from jokeapi.dev.").createGlobal(api).join();
             SlashCommand.with("createqr","Create a QR code with goqr.me.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING,"Data","Data to encode into the QR code.", true))).createGlobal(api).join();
@@ -100,7 +101,7 @@ public class MiatMain {
             System.out.println("**Apps Registered!** Set \"RegisterApps\" to false in config.json!");
         }
         /*
-        String slashCommandID = "1100917267182669944";
+        String slashCommandID = "1136471008405098588";
             try {
                 api.getGlobalSlashCommandById(Long.parseLong(slashCommandID)).get().delete();
             } catch (InterruptedException e) {
@@ -268,13 +269,20 @@ public class MiatMain {
             if (mc.getMessage().getReferencedMessage().isPresent()) {
                 if (mc.getMessage().getReferencedMessage().get().getUserAuthor().get().equals(self)) {
                     String prompt = m;
-                    String character = mc.getMessage().getReferencedMessage().get().getEmbeds().get(0).getAuthor().get().getName();
-                    mc.addReactionsToMessage("\uD83C\uDFDE️");
-                    Thread aiThread = new Thread(() -> {
-                        OobaboogaAI.aiRequest(prompt, mc, character);
-                        mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                    });
-                    aiThread.start();
+                    if(!mc.getMessage().getEmbeds().isEmpty()) {
+                        if (mc.getMessage().getEmbeds().get(0).getAuthor().isPresent()) {
+                            String character = mc.getMessage().getReferencedMessage().get().getEmbeds().get(0).getAuthor().get().getName();
+                            if (GetCharacter.inList(character, characterList)) {
+                                String characterContext = GetCharacter.getContext(character, characterList);
+                                mc.addReactionsToMessage("\uD83C\uDFDE️");
+                                Thread aiThread = new Thread(() -> {
+                                    OobaboogaAI.aiRequest(prompt, mc, character, characterContext);
+                                    mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
+                                });
+                                aiThread.start();
+                            }
+                        }
+                    }
                 }
             }
 
@@ -333,114 +341,13 @@ public class MiatMain {
                         String data = m.replace(prefix + "qr ", "");
                         mc.getMessage().reply(QRCodeCreate.qrCodeCreate(data));
                         break;
-                    case "tact":
-                        mc.addReactionsToMessage("\uD83D\uDCE8");
-                        Thread youThread = new Thread(() -> {
-                            OobaboogaAI.aiRequest(parts[1], mc, "Tact");
-                            mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDCE8");
-                        });
-                        youThread.start();
-                        break;
-                    case "cleck":
-                        mc.addReactionsToMessage("\uD83D\uDE80");
-                        Thread cleckThread = new Thread(() -> {
-                            OobaboogaAI.aiRequest(parts[1], mc, "Cleck");
-                            mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
-                        });
-                        cleckThread.start();
-                        break;
-                    case "topi":
-                    case "ttt":
-                        mc.addReactionsToMessage("\uD83C\uDFDE️");
-                        Thread topiThread = new Thread(() -> {
-                            OobaboogaAI.aiRequest(parts[1], mc, "Topi");
-                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                        });
-                        topiThread.start();
-                        break;
-                    case "serval":
-                        mc.addReactionsToMessage("\uD83C\uDFDE️");
-                        Thread servalThread = new Thread(() -> {
-                            OobaboogaAI.aiRequest(parts[1], mc, "Serval");
-                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                        });
-                        servalThread.start();
-                        break;
-                    case "blackbuck":
-                        mc.addReactionsToMessage("\uD83C\uDFDE️");
-                        Thread blackbuckThread = new Thread(() -> {
-                            OobaboogaAI.aiRequest(parts[1], mc, "Blackbuck");
-                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                        });
-                        blackbuckThread.start();
-                        break;
-                    case "coyote":
-                        mc.addReactionsToMessage("\uD83C\uDFDE");
-                        Thread coyoteThread = new Thread(() ->{
-                            OobaboogaAI.aiRequest(parts[1], mc, "Coyote");
-                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE");
-                        });
-                        coyoteThread.start();
-                        break;
-                    case "northerngoshawk":
-                    case "goshawk":
-                    case "northy":
-                        mc.addReactionsToMessage("\uD83E\uDEB6");
-                        Thread northernGoshawkThread = new Thread(() -> {
-                           OobaboogaAI.aiRequest(parts[1],mc, "Northern Goshawk");
-                           mc.removeOwnReactionByEmojiFromMessage("\uD83E\uDEB6");
-                        });
-                        northernGoshawkThread.start();
-                        break;
-                    case "wolverine":
-                        mc.addReactionsToMessage("\uD83C\uDFDE");
-                        Thread wolverineThread = new Thread(() -> {
-                            OobaboogaAI.aiRequest(parts[1], mc, "Wolverine");
-                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                        });
-                        wolverineThread.start();
-                        break;
-                    case "silverfox":
-                        mc.addReactionsToMessage("\uD83C\uDFDE");
-                        Thread silverfoxThread = new Thread(() -> {
-                            OobaboogaAI.aiRequest(parts[1], mc, "Silver Fox");
-                            mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
-                        });
-                        silverfoxThread.start();
-                        break;
-                    case "tarpan":
-                        mc.addReactionsToMessage("\uD83D\uDD8C\uFE0F");
-                        Thread tarpanThread = new Thread(() -> {
-                            OobaboogaAI.aiRequest(parts[1], mc, "Tarpan");
-                            mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDD8C\uFE0F");
-                        });
-                        tarpanThread.start();
-                        break;
-                    case "cheeto":
-                    case "cheetah":
-                    case "notpronghorn":
-                        mc.addReactionsToMessage("\uD83D\uDC08");
-                        Thread cheetahThread = new Thread(() -> {
-                           OobaboogaAI.aiRequest(parts[1],mc,"Cheetah");
-                           mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDC08");
-                        });
-                        cheetahThread.start();
-                        break;
                     case "bestclient":
                         Color seppuku = new Color(153, 0, 238);
                         EmbedBuilder e = new EmbedBuilder().setTitle("Seppuku").setDescription("Seppuku is one of the best clients of all time, ever!").setAuthor("Seppuku", "https://github.com/seppukudevelopment/seppuku", "https://github.com/seppukudevelopment/seppuku/raw/master/res/seppuku_full.png").addField("Seppuku Download", "https://github.com/seppukudevelopment/seppuku/releases").addInlineField("Github", "https://github.com/seppukudevelopment/seppuku").addInlineField("Website", "https://seppuku.pw").setColor(seppuku).setFooter("Seppuku", "https://github.com/seppukudevelopment/seppuku").setImage("https://github.com/seppukudevelopment/seppuku/blob/master/res/seppuku_full.png?raw=true").setThumbnail("https://github.com/seppukudevelopment/seppuku/blob/master/src/main/resources/assets/seppukumod/textures/seppuku-logo.png?raw=true");
                         mc.getMessage().reply(e);
                         break;
-                    case "remove":
-                        String miatId = mc.getMessage().requestReferencedMessage().get().join().getAuthor().getIdAsString();
-                        String commandIssuer = mc.getMessage().requestReferencedMessage().get().join().requestReferencedMessage().get().join().getAuthor().getIdAsString();
-
-                        if (miatId.equals(self.getIdAsString()) && mc.getMessageAuthor().getIdAsString().equals(commandIssuer)) {
-                            DelOwn.delOwn(mc, api);
-                            mc.getMessage().delete();
-                        } else {
-                            mc.getMessage().reply("You cannot delete others' messages using this command.");
-                        }
+                    case "rm":
+                        mc.getMessage().reply(DeleteMessage.deleteOwnCommandResponse(mc));
                         break;
                     case "purge":
                         String amt = m.replace(prefix + "purge ", "");
@@ -530,6 +437,18 @@ public class MiatMain {
                             }
                         }
                         break;
+                    default:
+                        String characterTest = parts[0].replace(prefix,"");
+                        if (GetCharacter.inList(characterTest, characterList)) {
+                            String context = GetCharacter.getContext(characterTest, characterList);
+                            mc.addReactionsToMessage("\uD83D\uDE80");
+                            Thread aiThread = new Thread(() -> {
+                                OobaboogaAI.aiRequest(parts[1], mc, characterTest, context);
+                                mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
+                            });
+                            aiThread.start();
+                            break;
+                        }
                 }
             }
 
