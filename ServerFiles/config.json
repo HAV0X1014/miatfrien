@@ -10,7 +10,8 @@
     "UseGoogleTranslateAsFallbackForDeepL": true,
     "RegisterSlashCommands": true,
     "RegisterApps": true,
-    
+
+    "OobaboogaAIServerEndpoint": "http://localhost:5000/api/v1/chat"
     "Whitelist": ["",""],
     "WebhookURL": "",
     "StatusText": "",
