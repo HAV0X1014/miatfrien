@@ -34,12 +34,15 @@ public class ReplyTraverse {
         return history;
     }
     private static void makePair(JSONArray msgChain, ArrayList messageStorage) {    //take a 'donor' json array and an array list with content
-        for (int i = 0; i < messageStorage.size(); i += 2) {    //obtain the size of the array list, and iterate through it two at a time, starting at 0
-            JSONArray ja = new JSONArray();                     //json array that only holds two values (like ["user_input","bot_input] for ooba's case)
-            if (i + 1 < messageStorage.size()) {                //if possible, go to the next element in the arraylist
-                ja.put(messageStorage.get(i + 1));              //put the i-plus-1-th element in the second element of the array
-            }
-            ja.put(messageStorage.get(i));                      //put the i-th element of the arraylist in the first element of the array
+        if (messageStorage.size() > 1) {                                                        //to replace the prefix and command from the original user input
+            String firstUserInput = messageStorage.get(messageStorage.size() - 1).toString();   //get the original user input command from message story
+            firstUserInput = firstUserInput.replaceFirst("^\\S* ", "");         //remove the first word said up to the first space
+            messageStorage.set(messageStorage.size() - 1, firstUserInput);                      //put it back in message storage
+        }
+        for (int i = messageStorage.size() - 2; i >= 0; i -= 2) {    //obtain the size of the array list, and iterate through it two at a time, starting at 0
+            JSONArray ja = new JSONArray();                         //json array that only holds two values (like ["user_input","bot_input] for ooba's case)
+            ja.put(0, messageStorage.get(i + 1));                   //make pair for bot
+            ja.put(1,messageStorage.get(i));                        //make pair for user
             msgChain.put(ja);                                   //put the two element arraylist into the message chain.
         }
     }
