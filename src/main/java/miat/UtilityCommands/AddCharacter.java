@@ -14,7 +14,7 @@ public class AddCharacter {
         name = name.toLowerCase().replaceAll(" ","");
 
         if (kfChar) {
-            description = description + "\n\nFriends are animals that became human girls, born from Sandstar. Friends are capable of feats that exceed normal human limits. A Friend will preserve some distinct features of their animal form, like ears, tails, and bird Friends with wings on their heads. Friends may also have personality traits which resemble the original animal. Kemonoplasm is a substance derived from Sandstar that can assume functional forms for a Friend, such as their animal features and clothing, while the rest of their body is that of a normal human. Friends' main source of nutrition are Japari Buns and other human foods.";
+            description = description + "\n\nFriends are human girls with animal-like features. They are animals that have transformed into human girls through a substance called Sandstar. While retaining influences from their animal form, such as ears, tail, wings (for bird friends), and personality traits, friends do not have paws, claws, or fur and are fully human. There are friends representing both extant and extinct animal species. Sandstar, a mineral, interacts with animals to create friends in their human form. Japari Park is an island safari that encompasses various biomes and ecosystems, housing the corresponding animal and plant life. At the center of the park is a large mountain, which generates Sandstar at its peak with crystalline structures extending beyond it. Celliens are cell-like alien creatures with the sole goal of consuming friends, causing them to revert to their animal form.";
         }
 
         String json = ReadFull.read("ServerFiles/characterList.json");

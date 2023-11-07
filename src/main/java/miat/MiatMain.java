@@ -302,7 +302,7 @@ public class MiatMain {
                         mc.getMessage().reply(Godsays.godSays());
                         break;
                     case "miat":
-                        mc.getMessage().reply("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 17) + ".png?raw=true");
+                        mc.getMessage().reply("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 18) + ".png?raw=true");
                         break;
                     case "base64":
                         mc.getMessage().reply(Vase64.vase64(m));
@@ -459,17 +459,34 @@ public class MiatMain {
                         }
                         break;
                     default:
-                        String characterTest = parts[0].toLowerCase().replace(prefix,"");
-                        if (GetCharacter.inList(characterTest, characterList)) {
-                            mc.addReactionsToMessage("\uD83D\uDE80");
-                            Thread aiThread = new Thread(() -> {
-                                OobaboogaAI instance = new OobaboogaAI();
-                                instance.aiRequest(parts[1], mc,characterTest);
-                                //OobaboogaAI.aiRequest(parts[1], mc, characterTest);
-                                mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
-                            });
-                            aiThread.start();
-                            break;
+                        String[] characters = parts[0].toLowerCase().replace(prefix,"").split(",");
+                        boolean invalidCharacter = false;
+                        boolean doConcat = false;
+                        StringBuilder invalidCharacterName = new StringBuilder();
+                        if (GetCharacter.inList(characters[0],characterList)) {
+                            for (String individial : characters) {
+                                if (!GetCharacter.inList(individial, characterList)) {           //if the name of the author field is not in the list of characters
+                                    invalidCharacter = true;
+                                    if (doConcat == true) {
+                                        invalidCharacterName.append(", ");
+                                    }
+                                    invalidCharacterName.append(individial);
+                                    doConcat = true;
+                                }
+                            }
+                            if (invalidCharacter == false) {
+                                mc.addReactionsToMessage("\uD83D\uDE80");
+                                Thread aiThread = new Thread(() -> {
+                                    OobaboogaAI instance = new OobaboogaAI();
+                                    instance.aiRequest(parts[1], mc, characters);
+                                    //OobaboogaAI.aiRequest(parts[1], mc, characterTest);
+                                    mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
+                                });
+                                aiThread.start();
+                                break;
+                            } else {
+                                mc.getChannel().sendMessage("Invalid character - ``" + invalidCharacterName + "``.");
+                            }
                         }
                 }
             }
@@ -479,16 +496,31 @@ public class MiatMain {
                     if (referencedMessage.getUserAuthor().get().equals(self)) {                     //if the author is the bot
                         if (!referencedMessage.getEmbeds().isEmpty()) {                              //if there are no embeds
                             if (referencedMessage.getEmbeds().get(0).getAuthor().isPresent()) {     //if the embed has an author
-                                String character = referencedMessage.getEmbeds().get(0).getAuthor().get().getName();    //get the name of the author field in the embed
-                                if (GetCharacter.inList(character, characterList)) {                                    //if the name of the author field is in the list of characters
+                                String[] characters = referencedMessage.getEmbeds().get(0).getAuthor().get().getName().split(", ");    //get the name of the author field in the embed
+                                boolean invalidCharacter = false;
+                                boolean doConcat = false;
+                                StringBuilder invalidCharacterName = new StringBuilder();
+                                for (String individial : characters) {
+                                    if (!GetCharacter.inList(individial,characterList)) {           //if the name of the author field is not in the list of characters
+                                        invalidCharacter = true;
+                                        if (doConcat == true) {
+                                            invalidCharacterName.append(", ");
+                                        }
+                                        invalidCharacterName.append(individial);
+                                        doConcat = true;
+                                    }
+                                }
+                                if (invalidCharacter == false) {
                                     mc.addReactionsToMessage("\uD83C\uDFDE️");
                                     Thread aiThread = new Thread(() -> {
                                         OobaboogaAI instance = new OobaboogaAI();
-                                        instance.aiRequest(m,mc,character);
+                                        instance.aiRequest(m, mc, characters);
                                         //OobaboogaAI.aiRequest(m, mc, character);
                                         mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
                                     });
                                     aiThread.start();
+                                } else {
+                                    mc.getChannel().sendMessage("Invalid character - ``" + invalidCharacterName +"``.");
                                 }
                             }
                         }
