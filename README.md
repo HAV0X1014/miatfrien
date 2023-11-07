@@ -8,6 +8,9 @@ https://discord.gg/dHNund6jey
 
 ## Main Features
 
+### Oobabooga AI API Integration
+Using an Oobabooga text generation webui API server, you can have AI chats! New characters can be added with `/addcharacter` by whitelisted members, and existing characters can be seen by anyone with `/getcharacter`. Start a conversation with one or more characters with the bot prefix (in my case, "[") and the character's name followed by a comma. For example, `[cleck how are you?` would ask the character named "cleck" how are you, and `[cloud,tarpan,southchinatiger lets go fishing!` would say lets go fishing to the three characters. 
+
 ### Translator
 Translate messages with flag emojis! React to a message with the country's flag of the language you want, and it will translate the content into that language. To use DeepL, react with a :regional_indicator_d: emoji and then the flag you wish. Remove translation messages with an :x: emoji.
 
