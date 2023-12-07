@@ -65,7 +65,7 @@ public class Help {
             case "miathelp ai":
                 e.setTitle("AI features");
                 e.setDescription("AI features are locally hosted and run. Specific model used may vary.\n\nTo continue a chat, reply to the last message sent by a character.");
-                e.addField("Characters", GetCharacter.getList(characterList));
+                e.addField("Characters", GetCharacter.getList());
                 e.setColor(Color.CYAN);
                 break;
 

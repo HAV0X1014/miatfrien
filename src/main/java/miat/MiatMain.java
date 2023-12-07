@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutionException;
 public class MiatMain {
     static boolean debugmessagelog;
     public static String configFile = ReadFull.read("ServerFiles/config.json");
-    public static String characterList = ReadFull.read("ServerFiles/characterList.json");
+    public static String characterList = ReadFull.read("ServerFiles/characters.json");
     static String token = ConfigHandler.getString("Token", configFile);
     public static String prefix = ConfigHandler.getString("Prefix", configFile);
     static String botName = ConfigHandler.getString("BotName", configFile);
@@ -194,7 +194,7 @@ public class MiatMain {
                         if (Whitelist.whitelisted(interaction.getUser().getIdAsString())) {
                             interactionOriginalResponseUpdater.setContent(AddCharacter.add(interaction, configFile)).update();
                             System.out.println("Refreshing Config and AI characters...");
-                            characterList = ReadFull.read("ServerFiles/characterList.json");
+                            characterList = ReadFull.read("ServerFiles/characters.json");
                             System.out.println("Refreshed.");
                         } else {
                             interactionOriginalResponseUpdater.setContent("You are not on the whitelist.").setFlags(MessageFlag.EPHEMERAL).update();
@@ -203,7 +203,8 @@ public class MiatMain {
                     break;
                 case "getcharacter":
                     EmbedBuilder em = new EmbedBuilder();
-                    em.setDescription(GetCharacter.getContext(interaction.getArgumentStringValueByName("name").get(), characterList));
+                    em.setTitle(GetCharacter.getName(interaction.getArgumentStringValueByName("name").get()));
+                    em.setDescription(GetCharacter.getDescription(interaction.getArgumentStringValueByName("name").get()));
                     interaction.createImmediateResponder().setContent("").addEmbed(em).setFlags(MessageFlag.EPHEMERAL).respond();
                     break;
 
@@ -427,12 +428,17 @@ public class MiatMain {
                         if (Whitelist.whitelisted(mc.getMessageAuthor().getIdAsString())) {
                             System.out.println("Refreshing Config and AI characters...");
                             configFile = ReadFull.read("ServerFiles/config.json");
-                            characterList = ReadFull.read("ServerFiles/characterList.json");
+                            characterList = ReadFull.read("ServerFiles/characters.json");
                             System.out.println("Refreshed.");
                             mc.getChannel().sendMessage("Config and AI characters refreshed.");
                         } else {
                             mc.getChannel().sendMessage("You are not on the whitelist.");
                         }
+                        break;
+                    case "image":
+                    case "img":
+                    case "search":
+                        mc.getMessage().reply(ImageSearch.search(parts[1]));
                         break;
                     case "ml":
                         if (parts.length > 1) {
@@ -459,13 +465,14 @@ public class MiatMain {
                         }
                         break;
                     default:
+                        //AI conversation start code
                         String[] characters = parts[0].toLowerCase().replace(prefix,"").split(",");
                         boolean invalidCharacter = false;
                         boolean doConcat = false;
                         StringBuilder invalidCharacterName = new StringBuilder();
-                        if (GetCharacter.inList(characters[0],characterList)) {
+                        if (GetCharacter.inList(characters[0])) {
                             for (String individial : characters) {
-                                if (!GetCharacter.inList(individial, characterList)) {           //if the name of the author field is not in the list of characters
+                                if (!GetCharacter.inList(individial)) {           //if the name of the author field is not in the list of characters
                                     invalidCharacter = true;
                                     if (doConcat == true) {
                                         invalidCharacterName.append(", ");
@@ -479,7 +486,6 @@ public class MiatMain {
                                 Thread aiThread = new Thread(() -> {
                                     OobaboogaAI instance = new OobaboogaAI();
                                     instance.aiRequest(parts[1], mc, characters);
-                                    //OobaboogaAI.aiRequest(parts[1], mc, characterTest);
                                     mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
                                 });
                                 aiThread.start();
@@ -494,14 +500,15 @@ public class MiatMain {
                 if (mc.getMessage().getReferencedMessage().isPresent() && mc.getMessage().getMentionedUsers().contains(self)) {                           //if message has reply to another message
                     Message referencedMessage = mc.getMessage().getReferencedMessage().get();       //set the replied to message to variable
                     if (referencedMessage.getUserAuthor().get().equals(self)) {                     //if the author is the bot
-                        if (!referencedMessage.getEmbeds().isEmpty()) {                              //if there are no embeds
-                            if (referencedMessage.getEmbeds().get(0).getAuthor().isPresent()) {     //if the embed has an author
-                                String[] characters = referencedMessage.getEmbeds().get(0).getAuthor().get().getName().split(", ");    //get the name of the author field in the embed
+                        if (!referencedMessage.getEmbeds().isEmpty()) {                             //if there are embeds
+                            if (referencedMessage.getEmbeds().get(0).getAuthor().isPresent()) {     //if the embed has an author field
+                                //this block checks if the characters in the replied-to message actually exist
+                                String[] characters = referencedMessage.getEmbeds().get(0).getAuthor().get().getName().split(", ");    //get the names in the author field of the embed
                                 boolean invalidCharacter = false;
                                 boolean doConcat = false;
                                 StringBuilder invalidCharacterName = new StringBuilder();
                                 for (String individial : characters) {
-                                    if (!GetCharacter.inList(individial,characterList)) {           //if the name of the author field is not in the list of characters
+                                    if (!GetCharacter.inList(individial)) {           //if the name of the author field is not in the list of characters
                                         invalidCharacter = true;
                                         if (doConcat == true) {
                                             invalidCharacterName.append(", ");
@@ -515,7 +522,6 @@ public class MiatMain {
                                     Thread aiThread = new Thread(() -> {
                                         OobaboogaAI instance = new OobaboogaAI();
                                         instance.aiRequest(m, mc, characters);
-                                        //OobaboogaAI.aiRequest(m, mc, character);
                                         mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
                                     });
                                     aiThread.start();
