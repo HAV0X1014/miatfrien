@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
 
 public class MiatMain {
     static boolean debugmessagelog;
@@ -484,8 +483,8 @@ public class MiatMain {
                             if (invalidCharacter == false) {
                                 mc.addReactionsToMessage("\uD83D\uDE80");
                                 Thread aiThread = new Thread(() -> {
-                                    OobaboogaAI instance = new OobaboogaAI();
-                                    instance.aiRequest(parts[1], mc, characters);
+                                    TactAI instance = new TactAI();
+                                    instance.aiRequest(m, mc, characters);
                                     mc.removeOwnReactionByEmojiFromMessage("\uD83D\uDE80");
                                 });
                                 aiThread.start();
@@ -520,7 +519,7 @@ public class MiatMain {
                                 if (invalidCharacter == false) {
                                     mc.addReactionsToMessage("\uD83C\uDFDE️");
                                     Thread aiThread = new Thread(() -> {
-                                        OobaboogaAI instance = new OobaboogaAI();
+                                        TactAI instance = new TactAI();
                                         instance.aiRequest(m, mc, characters);
                                         mc.removeOwnReactionByEmojiFromMessage("\uD83C\uDFDE️");
                                     });
