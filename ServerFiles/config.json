@@ -11,7 +11,7 @@
     "RegisterSlashCommands": true,
     "RegisterApps": true,
 
-    "OobaboogaAIServerEndpoint": "http://localhost:5000/api/v1/chat"
+    "AIServerEndpoint": "http://localhost:5000/v1/chat/completions"
     "Whitelist": ["",""],
     "WebhookURL": "",
     "StatusText": "",
