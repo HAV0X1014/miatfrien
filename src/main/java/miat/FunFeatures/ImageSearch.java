@@ -30,7 +30,6 @@ public class ImageSearch {
         try (Response response = vqdClient.newCall(vqdRequest).execute()) {
             // Parse the JSON response
             String vqdResponse = response.body().string();
-            System.out.println(vqdResponse);
             Matcher matcher = pattern.matcher(vqdResponse);
             if (matcher.find()) {
                 vqdValue = matcher.group(1);
@@ -84,7 +83,6 @@ public class ImageSearch {
             Matcher matcher = imager.matcher(jsonResponse);
             if (matcher.find()) {
                 imageURL = matcher.group(1);
-                System.out.println(imageURL);
             }
             
         } catch (IOException ex) {

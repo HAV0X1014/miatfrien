@@ -3,7 +3,6 @@ package miat.UtilityCommands;
 import com.deepl.api.DeepLException;
 import com.deepl.api.TextResult;
 import com.deepl.api.Translator;
-import miat.FileHandlers.ReadFirstLine;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import java.awt.*;

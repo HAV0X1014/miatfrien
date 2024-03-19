@@ -17,7 +17,7 @@ public class DeletedMessageLogChannel {
             }
         } else
 
-        logChannel = ReadFirstLine.read("ServerFiles/" + serverID + ".txt");
+        logChannel = ReadFile.getFirstLine("ServerFiles/" + serverID + ".txt");
         return logChannel;
     }
 }

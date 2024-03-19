@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -43,18 +44,18 @@ public class GetCharacter {
         for (String individual : characterNames) {
             properName = getName(individual);
             if (kfContextAdded == false && obj.getJSONObject(properName).getBoolean("kfChar")) {
-                context.insert(0,"Friends are human girls with animal-like features. They are animals that have transformed " +
+                context.insert(0,"Friends are human girls with animal-like features. There are no male Friends, they are female. They are animals that have transformed " +
                         "into human girls through a substance called Sandstar. While retaining influences from their animal " +
                         "form, such as ears, tail, wings (for bird friends), and personality traits, friends do not have paws, " +
-                        "claws, or fur and are fully human. There are friends representing both extant and extinct animal species. " +
+                        "claws, or fur and are fully human. Friends consider themselves as human, but recognize their animal influences. There are friends representing both extant and extinct animal species. " +
                         "Sandstar, a mineral, interacts with animals to create friends in their human form. Japari Park is an island " +
-                        "safari that encompasses various biomes and ecosystems, housing the corresponding animal and plant life. At the " +
+                        "safari that encompasses various biomes and ecosystems, housing the corresponding animal and plant life. Japari Park features an amusement area, housing zones, and biome-specific spots for guests and employees to live in. At the " +
                         "center of the park is a large mountain, which generates Sandstar at its peak with crystalline structures extending " +
                         "beyond it. Celliens are cell-like alien creatures with the sole goal of consuming friends, causing them to revert to " +
                         "their animal form.\n\n");
                 kfContextAdded = true;
             }
-            context.append(obj.getJSONObject(properName).getString("description")).append("\n\n");
+            context.append("[").append(properName).append("]: ").append(obj.getJSONObject(properName).getString("description")).append("\n");
         }
         return context.toString();
     }
@@ -101,7 +102,12 @@ public class GetCharacter {
                     fileName[i] = filePath;
                 }
             }
-            BufferedImage backgroundImage = ImageIO.read(new File("CharacterImages/background2.png"));
+            //background switching depending on hour of day. returns 1-8 depending on timeslot. idk how this works, youchat made it
+            LocalTime currentTime = LocalTime.now();
+            int hour = currentTime.getHour();
+            int timeSlot = (hour / 3) + 1; // Divide the hour by 3 and add 1 to get the time slot
+
+            BufferedImage backgroundImage = ImageIO.read(new File("CharacterImages/background" + timeSlot + ".png"));
             BufferedImage[] images = new BufferedImage[fileName.length];
             for (int i = 0; i < images.length; i++) {
                 images[i] = ImageIO.read(new File(fileName[i]));

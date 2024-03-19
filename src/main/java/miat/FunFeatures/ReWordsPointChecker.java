@@ -1,6 +1,6 @@
 package miat.FunFeatures;
 
-import miat.FileHandlers.ReadFirstLine;
+import miat.FileHandlers.ReadFile;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.interaction.SlashCommandInteraction;
 
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 public class ReWordsPointChecker {
     public static void pointCheck(SlashCommandInteraction interaction) {
         String userID = interaction.getUser().getIdAsString();
-        String score = ReadFirstLine.read("ReWordsScores/" + userID + ".txt");
+        String score = ReadFile.getFirstLine("ReWordsScores/" + userID + ".txt");
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Point Check");
         e.addField("\u200b","<@" + userID + ">\nScore : ``" + score + "``!\nIncrease it by saying the secret phrases right!");
@@ -27,7 +27,7 @@ public class ReWordsPointChecker {
 
     public static void user(SlashCommandInteraction interaction) {
         String userID = interaction.getArgumentUserValueByIndex(0).get().getIdAsString();
-        String score = ReadFirstLine.read("ReWordsScores/" + userID + ".txt");
+        String score = ReadFile.getFirstLine("ReWordsScores/" + userID + ".txt");
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Point Check");
         e.addField("\u200b", "<@" + userID + ">\nScore : ``" + score + "``\nIncrease it by saying the secret phrases right!");
@@ -48,8 +48,8 @@ public class ReWordsPointChecker {
             filePathStream.forEach(filePath -> {
                 if (Files.isRegularFile(filePath)) {
                     users.add(String.valueOf(filePath));
-                    storedScores.add(Integer.parseInt(ReadFirstLine.read(String.valueOf(filePath))));
-                    storedScoresCopy.add(Integer.parseInt(ReadFirstLine.read(String.valueOf(filePath))));
+                    storedScores.add(Integer.parseInt(ReadFile.getFirstLine(String.valueOf(filePath))));
+                    storedScoresCopy.add(Integer.parseInt(ReadFile.getFirstLine(String.valueOf(filePath))));
                 }
             });
 

@@ -1,6 +1,6 @@
 package miat.UtilityCommands;
 
-import miat.FileHandlers.ReadFull;
+import miat.FileHandlers.ReadFile;
 import miat.FileHandlers.Writer;
 import org.javacord.api.interaction.SlashCommandInteraction;
 import org.json.JSONObject;
@@ -10,11 +10,9 @@ public class AddCharacter {
         String name = interaction.getArgumentStringValueByName("name").get();
         String description = interaction.getArgumentStringValueByName("description").get();
         boolean kfChar = interaction.getArgumentBooleanValueByName("kfchar").get();
-        String imageURL = interaction.getArgumentStringValueByName("imageurl").orElse("");
+        String imageURL = interaction.getArgumentStringValueByName("imagepath").orElse("");
 
-        name = name.replaceAll(" ","");
-
-        String json = ReadFull.read("ServerFiles/characters.json");
+        String json = ReadFile.getFull("ServerFiles/characters.json");
         JSONObject jsonObject = new JSONObject(json);
 
         JSONObject newEntry = new JSONObject();

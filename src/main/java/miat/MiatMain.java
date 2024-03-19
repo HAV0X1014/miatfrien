@@ -31,8 +31,8 @@ import java.util.Random;
 
 public class MiatMain {
     static boolean debugmessagelog;
-    public static String configFile = ReadFull.read("ServerFiles/config.json");
-    public static String characterList = ReadFull.read("ServerFiles/characters.json");
+    public static String configFile = ReadFile.getFull("ServerFiles/config.json");
+    public static String characterList = ReadFile.getFull("ServerFiles/characters.json");
     static String token = ConfigHandler.getString("Token", configFile);
     public static String prefix = ConfigHandler.getString("Prefix", configFile);
     static String botName = ConfigHandler.getString("BotName", configFile);
@@ -65,7 +65,7 @@ public class MiatMain {
 
         if (registerSlashCommands) {
             System.out.println("Registering slash commands. This will take some time...");
-            /*SlashCommand.with("ping", "Check if the bot is up.").createGlobal(api).join();
+            SlashCommand.with("ping", "Check if the bot is up.").createGlobal(api).join();
             SlashCommand.with("uptime", "Get the uptime of the bot.").createGlobal(api).join();
             SlashCommand.with("purge","Delete the specified number of messages.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "Messages", "Amount of messages to delete.", true))).createGlobal(api).join();
             SlashCommand.with("delete","Delete the specified message by ID.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "MessageID", "MessageID of the message you want to delete.", true))).createGlobal(api).join();
@@ -74,11 +74,11 @@ public class MiatMain {
             SlashCommand.with("setlogchannel","Set the deleted message log channel.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.CHANNEL, "Channel", "The channel you want to log deleted messages to.", true))).createGlobal(api).join();
             SlashCommand.with("ban","Ban the specified user.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER,"User", "The user to ban.",true))).createGlobal(api).join();
             SlashCommand.with("kick","Kick the specified user.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.USER,"User","User to kick.", true))).createGlobal(api).join();
-            */
+
             SlashCommand.with("miathelp","Show help for the selected category.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND, "fun","Shows a list of fun commands.", false), SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND,"utility","Shows a list of utility commands.", false), SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND,"ai","Shows info about the AI features.",false))).createGlobal(api).join();
-            SlashCommand.with("addcharacter","Add a character to the AI. (Whitelisted)", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "name", "The character's name.",true), SlashCommandOption.create(SlashCommandOptionType.STRING, "description", "The description of the character including world details.", true), SlashCommandOption.create(SlashCommandOptionType.BOOLEAN, "kfchar", "True/False for KF character (adds world detail)",true))).createGlobal(api).join();
+            SlashCommand.with("addcharacter","Add a character to the AI. (Whitelisted)", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "name", "The character's name.",true), SlashCommandOption.create(SlashCommandOptionType.STRING, "description", "The description of the character including world details.", true), SlashCommandOption.create(SlashCommandOptionType.BOOLEAN, "kfchar", "True/False for KF character (adds world detail)",true), SlashCommandOption.create(SlashCommandOptionType.STRING, "imagepath", "Filepath to the character's image (CharacterImages/name.png)"))).createGlobal(api).join();
             SlashCommand.with("getcharacter","Get the character description for the requested character.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "name", "The name of the character you want.", true))).createGlobal(api).join();
-            /*SlashCommand.with("invite","Get an invite link for this bot with permissions needed to function.").createGlobal(api).join();
+            SlashCommand.with("invite","Get an invite link for this bot with permissions needed to function.").createGlobal(api).join();
             SlashCommand.with("translate","Translate text with Google Translate into the desired language.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "source", "The text you want to translate.", true), SlashCommandOption.create(SlashCommandOptionType.STRING, "target", "The language you want the text in. (Currently not implemented)", false))).createGlobal(api).join();
             SlashCommand.with("deepl","Translate text with DeepL Translator into the desired language.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "source", "The text you want to translate.", true), SlashCommandOption.create(SlashCommandOptionType.STRING, "target", "The language you want the text in. (Currently not implemented)", false))).createGlobal(api).join();
 
@@ -92,7 +92,7 @@ public class MiatMain {
             SlashCommand.with("joke","Get a random joke from jokeapi.dev.").createGlobal(api).join();
             SlashCommand.with("createqr","Create a QR code with goqr.me.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING,"Data","Data to encode into the QR code.", true))).createGlobal(api).join();
             SlashCommand.with("8ball","Ask a question to the intelligent 8ball.", Arrays.asList(SlashCommandOption.create(SlashCommandOptionType.STRING,"question", "The question you want answered.",true))).createGlobal(api).join();
-            */
+
             System.out.println("SLASH COMMANDS REGISTERED! Set \"RegisterSlashCommands\" to \"false\" in config.json!");
         }
 
@@ -193,7 +193,7 @@ public class MiatMain {
                         if (Whitelist.whitelisted(interaction.getUser().getIdAsString())) {
                             interactionOriginalResponseUpdater.setContent(AddCharacter.add(interaction, configFile)).update();
                             System.out.println("Refreshing Config and AI characters...");
-                            characterList = ReadFull.read("ServerFiles/characters.json");
+                            characterList = ReadFile.getFull("ServerFiles/characters.json");
                             System.out.println("Refreshed.");
                         } else {
                             interactionOriginalResponseUpdater.setContent("You are not on the whitelist.").setFlags(MessageFlag.EPHEMERAL).update();
@@ -426,8 +426,8 @@ public class MiatMain {
                     case "refresh":
                         if (Whitelist.whitelisted(mc.getMessageAuthor().getIdAsString())) {
                             System.out.println("Refreshing Config and AI characters...");
-                            configFile = ReadFull.read("ServerFiles/config.json");
-                            characterList = ReadFull.read("ServerFiles/characters.json");
+                            configFile = ReadFile.getFull("ServerFiles/config.json");
+                            characterList = ReadFile.getFull("ServerFiles/characters.json");
                             System.out.println("Refreshed.");
                             mc.getChannel().sendMessage("Config and AI characters refreshed.");
                         } else {
@@ -481,6 +481,7 @@ public class MiatMain {
                                 }
                             }
                             if (invalidCharacter == false) {
+                                rmCommandBool = true;
                                 mc.addReactionsToMessage("\uD83D\uDE80");
                                 Thread aiThread = new Thread(() -> {
                                     TactAI instance = new TactAI();
@@ -556,7 +557,7 @@ public class MiatMain {
 
             //this is hardcoded and will stay hardcoded because i find it funny when people get told to not say the n word.
             //i dont even care about the word itself, its funny to see people act tough against a bot when they say a word.
-            if (m.toLowerCase().contains("nigg") || m.toLowerCase().contains("n1gg") || m.toLowerCase().contains("kotlin user") || m.toLowerCase().contains("hewwo")) {
+            if (m.toLowerCase().contains("nigg") || m.toLowerCase().contains("n1gg") || m.toLowerCase().contains("kotlin user")) {
                 mc.getChannel().sendMessage("__**Racial slurs are discouraged!**__");
             }
         });
@@ -590,7 +591,7 @@ public class MiatMain {
             join.setAuthor(me);
             join.setTitle("Hello," + botName + " is here!");
             join.setThumbnail("https://cdn.discordapp.com/attachments/919786447488290816/920839787789836288/miat.jpeg");
-            join.addField("Information :", "Slash Commands are supported! \nPrefix : ``" + prefix +"``\nCreator : ``HAV0X#1009`` & ``arsonfrog#9475``");
+            join.addField("Information :", "Slash Commands are supported! \nPrefix : ``" + prefix +"``\nCreator : ``HAV0X`` & ``arsonfrog``");
             join.addField("Get Started :", "Help : ``/miathelp``\nSet Deleted Message Log Channel : ``/setlogchannel``");
             botJoin.getServer().getSystemChannel().get().sendMessage(join);
         });

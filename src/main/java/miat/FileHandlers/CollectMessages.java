@@ -29,13 +29,13 @@ public class CollectMessages {
                 reply.put("content",currentMessage.getEmbeds().get(0).getDescription().get().toString());
             } else {
                 reply.put("role","user");
-                reply.put("name",message.getUserAuthor().get().getDisplayName(mc.getServer().get()));
+                reply.put("name",currentMessage.getUserAuthor().get().getDisplayName(mc.getServer().get()));
                 reply.put("content", currentMessage.getContent());
             }
             messages.put(reply);
         }
 
-        //get the content of the message at the very end and remove the command so it doesnt fuck with the AI
+        //get the content of the message at the very end and remove the command so it doesn't fuck with the AI
         JSONObject initialCommandObject = messages.getJSONObject(messages.length() - 1);
         String content = initialCommandObject.getString("content");
         String prefixRemoved = content.replaceAll("^\\S* ", "");
