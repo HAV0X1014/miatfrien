@@ -1,7 +1,6 @@
 package miat.FileHandlers;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,17 +20,17 @@ public class ReadFile {
     }
 
     public static String getFull(String filePath) {
-        String fullText = "";
+        StringBuilder fullText = new StringBuilder();
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                fullText += line;
+                fullText.append(line);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return fullText;
+        return fullText.toString();
     }
 
     public static String getRandomLine(String filePath) {
@@ -47,12 +46,9 @@ public class ReadFile {
             reader.close();
 
             Random random = new Random();
-            String randomLine = lines.get(random.nextInt(lines.size()));
 
-            return randomLine;
+            return lines.get(random.nextInt(lines.size()));
 
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

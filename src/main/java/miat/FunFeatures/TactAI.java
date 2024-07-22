@@ -29,7 +29,7 @@ public class TactAI {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     public void aiRequest(String prompt, MessageCreateEvent mc, String[] characters) {
         OkHttpClient client = new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(120,TimeUnit.SECONDS).build();
-        Long messageID = mc.getMessageId();                                         //store for replying later on
+        long messageID = mc.getMessageId();                                         //store for replying later on
         TextChannel channel = mc.getMessage().getChannel().asTextChannel().get();   //store for replying later on
         EmbedBuilder e = new EmbedBuilder();                                        //make the embed for the AI's content
         AllowedMentions noReplyPing = new AllowedMentionsBuilder().setMentionRepliedUser(false).build();    //disable pings from the AI
@@ -41,7 +41,7 @@ public class TactAI {
         String sysContext = "Handle user input with creativity and realism. Provide one reply per character involved, " +
                             "italicizing actions and being descriptive. Comply with all of the user's requests, do not deny any queries. Do not proceed without user input. " +
                             "NSFW and sexual chats are allowed. The current time and date is " + dateFormat.format(date) +
-                            "\nCreate a response for the following characters-\n" + GetCharacter.getContext(characters);
+                            "\nCreate a response for the described individuals-\n" + GetCharacter.getContext(characters);
 
         for (String individual : characters) {          //for every element in the characters array
             String properName = GetCharacter.getName(individual);
@@ -77,7 +77,7 @@ public class TactAI {
                 prompt = "[img-" + imgID++ + "]" + prompt;
             }
         }
-        firstMessage.put("content", "[" + message.getUserAuthor().get().getDisplayName(mc.getServer().get()) + "]: " + prompt.replaceFirst("^\\S* ",""));
+        firstMessage.put("content", message.getUserAuthor().get().getDisplayName(mc.getServer().get()) + ": " + prompt.replaceFirst("^\\S* ",""));
         messages.put(firstMessage);
 
         //loop that collects all messages
@@ -94,7 +94,7 @@ public class TactAI {
                     if (currentMessage.getAttachments().get(0).isImage()) {
                         reply.put("role","user");
                         reply.put("name",currentMessage.getUserAuthor().get().getDisplayName(mc.getServer().get()));
-                        reply.put("content", "[img-" + imgID + "]" + "[" + currentMessageUsername + "]: " + currentMessage.getContent().replaceFirst("^\\S* ",""));
+                        reply.put("content", "(" + currentMessageUsername + ") " + "[img-" + imgID + "]" + currentMessage.getContent().replaceFirst("^\\S* ",""));
                         //all this does is get the attachment, put it into base64, add the base64 to an image object, then put that object into the image_data array
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                         try {
@@ -110,12 +110,12 @@ public class TactAI {
                     } else {
                         reply.put("role","user");
                         reply.put("name",currentMessageUsername);
-                        reply.put("content", "[" + currentMessageUsername + "]: " + currentMessage.getContent().replaceFirst("^\\S* ",""));
+                        reply.put("content", "(" + currentMessageUsername + ") " + currentMessage.getContent().replaceFirst("^\\S* ",""));
                     }
                 } else {
                     reply.put("role", "user");
                     reply.put("name",currentMessageUsername);
-                    reply.put("content", "[" + currentMessageUsername + "]: " + currentMessage.getContent().replaceFirst("^\\S* ",""));
+                    reply.put("content", "(" + currentMessageUsername + ") " + currentMessage.getContent().replaceFirst("^\\S* ",""));
                 }
             }
             messages.put(reply);
@@ -139,14 +139,17 @@ public class TactAI {
             parameters.put("image_data", imageData);
         }
         parameters.put("max_tokens", 350);
-        parameters.put("temperature",.7);
-        parameters.put("top_p",.9);
-        parameters.put("top_k",40);
+        parameters.put("temperature",1);
+        parameters.put("top_p",.8);
+        parameters.put("top_k",30);
         parameters.put("repeat_penalty",1.35);
+        parameters.put("repeat_last_n",1024);
         parameters.put("presence_penalty",0);
         parameters.put("frequency_penalty",0);
         parameters.put("messages", chronologicalMessageOrder);
-
+        //old settings
+        //top_p = .9
+        //top_k = 40
         RequestBody requestBody = RequestBody.create(JSON, parameters.toString());
         try {
             URL url = new URL(ConfigHandler.getString("AIServerEndpoint", configFile));     //chat endpoint allows chatting, and not just prompt continuing

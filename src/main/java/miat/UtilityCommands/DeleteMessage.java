@@ -7,6 +7,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.event.message.MessageCreateEvent;
+import org.javacord.api.event.message.reaction.ReactionAddEvent;
 import org.javacord.api.interaction.SlashCommandInteraction;
 
 import java.util.regex.Matcher;

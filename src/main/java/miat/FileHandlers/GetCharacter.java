@@ -55,7 +55,7 @@ public class GetCharacter {
                         "their animal form.\n\n");
                 kfContextAdded = true;
             }
-            context.append("[").append(properName).append("]: ").append(obj.getJSONObject(properName).getString("description")).append("\n");
+            context.append(properName).append("- ").append(obj.getJSONObject(properName).getString("description")).append("\n");
         }
         return context.toString();
     }
@@ -105,7 +105,7 @@ public class GetCharacter {
             //background switching depending on hour of day. returns 1-8 depending on timeslot. idk how this works, youchat made it
             LocalTime currentTime = LocalTime.now();
             int hour = currentTime.getHour();
-            int timeSlot = (hour / 3) + 1; // Divide the hour by 3 and add 1 to get the time slot
+            int timeSlot = (hour / 2) + 1; // Divide the hour by 3 and add 1 to get the time slot
 
             BufferedImage backgroundImage = ImageIO.read(new File("CharacterImages/background" + timeSlot + ".png"));
             BufferedImage[] images = new BufferedImage[fileName.length];

@@ -48,6 +48,7 @@ public class MiatMain {
     static Boolean registerSlashCommands = ConfigHandler.getBoolean("RegisterSlashCommands", configFile);
     static String statusText = ConfigHandler.getString("StatusText", configFile);
     static boolean registerApps = ConfigHandler.getBoolean("RegisterApps", configFile);
+    public static AllowedMentions noReplyPing = new AllowedMentionsBuilder().setMentionRepliedUser(false).build();
 
     public static void main(String[] args) {
         DiscordApi api = new DiscordApiBuilder().setToken(token).setAllIntents().login().join();
@@ -59,7 +60,6 @@ public class MiatMain {
         Translator translator = new Translator(); //google translate object
         if (deepLKey == null) deepLKey = "0";
         com.deepl.api.Translator deepLTranslator = new com.deepl.api.Translator(deepLKey); //deepL translator object
-        AllowedMentions noReplyPing = new AllowedMentionsBuilder().setMentionRepliedUser(false).build();
 
         api.updateActivity(ActivityType.PLAYING, statusText);
 
@@ -191,7 +191,7 @@ public class MiatMain {
                 case "addcharacter":
                     interaction.respondLater().thenAccept(interactionOriginalResponseUpdater -> {
                         if (Whitelist.whitelisted(interaction.getUser().getIdAsString())) {
-                            interactionOriginalResponseUpdater.setContent(AddCharacter.add(interaction, configFile)).update();
+                            interactionOriginalResponseUpdater.setContent(AddCharacter.add(interaction)).update();
                             System.out.println("Refreshing Config and AI characters...");
                             characterList = ReadFile.getFull("ServerFiles/characters.json");
                             System.out.println("Refreshed.");
@@ -276,6 +276,7 @@ public class MiatMain {
             if (debugmessagelog) {
                 if (!mc.getMessageAuthor().equals(self) && !mc.getMessageAuthor().toString().equals("MessageAuthor (id: 919786500890173441, name: Miat Bot)")) {
                     try {
+
                         Webhook.send(ConfigHandler.getString("WebhookURL", configFile), "'" + m + "'\n\n- " + author + "\n- At " + time + " \n- " + server);
                     } catch (IOException e1) {
                         e1.printStackTrace();
@@ -293,34 +294,34 @@ public class MiatMain {
 
                 switch (command) {
                     case "randfr":
-                        mc.getMessage().reply(RandFr.randomFriend());
+                        Respond.replyNoPing(mc,RandFr.randomFriend());
                         break;
                     case "inspiro":
-                        mc.getMessage().reply(Inspiro.inspiro());
+                        Respond.replyNoPing(mc,Inspiro.inspiro());
                         break;
                     case "godsays":
-                        mc.getMessage().reply(Godsays.godSays());
+                        Respond.replyNoPing(mc,Godsays.godSays());
                         break;
                     case "miat":
-                        mc.getMessage().reply("https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 18) + ".png?raw=true");
+                        Respond.replyNoPing(mc,"https://github.com/balls99dotexe/images/blob/main/miatas/miata" + (int) Math.floor(1 + Math.random() * 18) + ".png?raw=true");
                         break;
                     case "base64":
-                        mc.getMessage().reply(Vase64.vase64(m));
+                        Respond.replyNoPing(mc,Vase64.vase64(m));
                         break;
                     case "help":
-                        mc.getMessage().reply("Help is in the ``/miathelp`` slash command now!");
+                        Respond.replyNoPing(mc,"Help is in the ``/miathelp`` slash command now!");
                         break;
                     case "setactivity":
-                        mc.getMessage().reply(SetActivity.setactivity(m, mc, api, prefix));
+                        Respond.replyNoPing(mc,SetActivity.setactivity(m, mc, api, prefix));
                         break;
                     case "animalfact":
-                        mc.getMessage().reply(AnimalFact.animalFact());
+                        Respond.replyNoPing(mc,AnimalFact.animalFact());
                         break;
                     case "wiki":
-                        mc.getMessage().reply(Wikipedia.randomArticle());
+                        Respond.replyNoPing(mc,Wikipedia.randomArticle());
                         break;
                     case "uptime":
-                        mc.getMessage().reply(Uptime.uptime(startTime));
+                        Respond.replyNoPing(mc,Uptime.uptime(startTime));
                         break;
                     case "joke":
                         Random random = new Random();
@@ -330,23 +331,24 @@ public class MiatMain {
                             mc.addReactionsToMessage("\uD83D\uDEE0️");
                             mc.addReactionsToMessage("\uD83D\uDEA7");
                             mc.addReactionsToMessage("\uD83D\uDC77");
-                            mc.getMessage().reply("https://cdn.discordapp.com/attachments/1100888255483875428/1123410595333537943/under_construction.mp4");
+                            Respond.replyNoPing(mc,"https://cdn.discordapp.com/attachments/1100888255483875428/1123410595333537943/under_construction.mp4");
                         } else {
-                            mc.getMessage().reply(RandomJoke.randomJoke());
+                            Respond.replyNoPing(mc,RandomJoke.randomJoke());
                         }
                         break;
                     case "qr":
                         String data = m.replace(prefix + "qr ", "");
-                        mc.getMessage().reply(QRCodeCreate.qrCodeCreate(data));
+                        Respond.replyNoPing(mc,QRCodeCreate.qrCodeCreate(data));
                         break;
                     case "bestclient":
                         Color seppuku = new Color(153, 0, 238);
                         EmbedBuilder e = new EmbedBuilder().setTitle("Seppuku").setDescription("Seppuku is one of the best clients of all time, ever!").setAuthor("Seppuku", "https://github.com/seppukudevelopment/seppuku", "https://github.com/seppukudevelopment/seppuku/raw/master/res/seppuku_full.png").addField("Seppuku Download", "https://github.com/seppukudevelopment/seppuku/releases").addInlineField("Github", "https://github.com/seppukudevelopment/seppuku").addInlineField("Website", "https://seppuku.pw").setColor(seppuku).setFooter("Seppuku", "https://github.com/seppukudevelopment/seppuku").setImage("https://github.com/seppukudevelopment/seppuku/blob/master/res/seppuku_full.png?raw=true").setThumbnail("https://github.com/seppukudevelopment/seppuku/blob/master/src/main/resources/assets/seppukumod/textures/seppuku-logo.png?raw=true");
-                        mc.getMessage().reply(e);
+                        Respond.replyNoPing(mc,e);
                         break;
                     case "rm":
+                    case "remove":
                         rmCommandBool = true;
-                        mc.getMessage().reply(DeleteMessage.deleteOwnCommandResponse(mc));
+                        Respond.replyNoPing(mc,DeleteMessage.deleteOwnCommandResponse(mc));
                         Thread rmMsg = new Thread(() -> {
                             Message notif = mc.getChannel().getMessages(1).join().getNewestMessage().get();
                             try {
@@ -360,7 +362,7 @@ public class MiatMain {
                         break;
                     case "purge":
                         String amt = m.replace(prefix + "purge ", "");
-                        mc.getMessage().reply(Purge.purge(mc, amt));
+                        Respond.replyNoPing(mc,Purge.purge(mc, amt));
                         Thread removeNotice = new Thread(() -> {
                             Message notif = mc.getChannel().getMessages(1).join().getNewestMessage().get();
                             try {
@@ -374,53 +376,53 @@ public class MiatMain {
                         break;
                     case "translate":
                         String textToTranslate = m.replace(prefix + "translate ", "");
-                        mc.getMessage().reply(Trnsl.trnsl(translator, textToTranslate, Language.ENGLISH));
+                        Respond.replyNoPing(mc,Trnsl.trnsl(translator, textToTranslate, Language.ENGLISH));
                         break;
                     case "deepl":
                         if (deeplEnabled) {
                             String deepLTextToTranslate = m.replace(prefix + "deepl ", "");
-                            mc.getMessage().reply(DeepL.deepl(deepLTranslator, deepLTextToTranslate, "en-US"));
+                            Respond.replyNoPing(mc,DeepL.deepl(deepLTranslator, deepLTextToTranslate, "en-US"));
                         } else {
-                            mc.getMessage().reply("DeepL translation is not enabled.");
+                            Respond.replyNoPing(mc,"DeepL translation is not enabled.");
                         }
                         break;
                     case "8ball":
-                        mc.getMessage().reply(EightBall.eightBall(m));
+                        Respond.replyNoPing(mc,EightBall.eightBall(m));
                         break;
                     case "supermagicnumber":
                     case "magicnumber":
                         if (parts.length > 1) {
                             String numbers = parts[1].replaceAll("[^0-9]","");
-                            mc.getMessage().reply(SuperMagicNumber.superMagic(numbers));
+                            Respond.replyNoPing(mc,SuperMagicNumber.superMagic(numbers));
                         } else {
-                            mc.getMessage().reply(SuperMagicNumber.superMagic(mc.getMessageAuthor().getIdAsString()));
+                            Respond.replyNoPing(mc,SuperMagicNumber.superMagic(mc.getMessageAuthor().getIdAsString()));
                         }
                         break;
                     case "spiritfriend":
                         if (parts.length > 1) {
                             String numbers = parts[1].replaceAll("[^0-9]", "");
-                            mc.getMessage().reply(SpiritFriend.spiritFriend(numbers));
+                            Respond.replyNoPing(mc,SpiritFriend.spiritFriend(numbers));
                         } else {
-                            mc.getMessage().reply(SpiritFriend.spiritFriend(mc.getMessageAuthor().getIdAsString()));
+                            Respond.replyNoPing(mc,SpiritFriend.spiritFriend(mc.getMessageAuthor().getIdAsString()));
                         }
                         break;
                     case "fotw":
                     case "friendoftheweek":
                         if (parts.length > 1) {
                             String numbers = parts[1].replaceAll("[^0-9]","");
-                            mc.getMessage().reply(SpiritFriend.friendOfTheWeek(numbers));
+                            Respond.replyNoPing(mc,SpiritFriend.friendOfTheWeek(numbers));
                         } else {
-                            mc.getMessage().reply(SpiritFriend.friendOfTheWeek(mc.getMessageAuthor().getIdAsString()));
+                            Respond.replyNoPing(mc,SpiritFriend.friendOfTheWeek(mc.getMessageAuthor().getIdAsString()));
                         }
                         break;
                     case "collatz":
                         if (parts.length > 1) {
                             String number = parts[1].replaceAll("[^0-9]","");
-                            mc.getMessage().reply(Collatz.collatz(number));
+                            Respond.replyNoPing(mc,Collatz.collatz(number));
                         } else {
                             Random ran = new Random();
                             int number = ran.nextInt(100000000);
-                            mc.getMessage().reply(Collatz.collatz(String.valueOf(number)));
+                            Respond.replyNoPing(mc,Collatz.collatz(String.valueOf(number)));
                         }
                         break;
                     case "refresh":
@@ -437,8 +439,29 @@ public class MiatMain {
                     case "image":
                     case "img":
                     case "search":
-                        mc.getMessage().reply(ImageSearch.search(parts[1]));
+                        Respond.replyNoPing(mc,ImageSearch.search(parts[1]));
                         break;
+                    case "recipe":
+                        Respond.replyNoPing(mc,"2 tablespoons oil\n" +
+                                "1 medium onion, diced small\n" +
+                                "3 cloves garlic, minced\n" +
+                                "1 pound lean ground beef\n" +
+                                "2 tablespoons tomato paste\n" +
+                                "2 & 1/2 tablespoons chili powder\n" +
+                                "1 & 1/2 tablespoons ground cumin\n" +
+                                "1 & 1/2 teaspoons salt\n" +
+                                "1/2 teaspoon black pepper\n" +
+                                "1/4 teaspoon cinnamon\n" +
+                                "1 & 1/2 cups beef broth\n" +
+                                "8 ounce tomato sauce\n" +
+                                "15 ounce can crushed tomatoes\n" +
+                                "\n" +
+                                "1. Warm the oil in a large pot over medium-high heat. Add in the onion and garlic. Cook, stirring occasionally, for 3-4 minutes until the onion becomes translucent. \n" +
+                                "2. Add the ground beef to the pot. Cook for 5-6 minutes, breaking it apart, until browned and no pink remains.\n" +
+                                "3. Stir in the tomato paste, chili powder, cumin, salt, pepper, and cinnamon until everything is thoroughly combined.\n" +
+                                "4. Pour in the broth, tomato sauce, crushed tomatoes, and kidney beans. Stir well.\n" +
+                                "5. Bring the liquid to a boil, then reduce heat to a gentle simmer (low to medium-low.) Cook, uncovered, for about 20 minutes, stirring occasionally to prevent sticking. \n" +
+                                "6. Remove the pot from the heat and let rest for 5 minutes.");
                     case "ml":
                         if (parts.length > 1) {
                             String toggle = parts[1];
@@ -449,7 +472,7 @@ public class MiatMain {
                                         debugmessagelog = true;
                                         mc.getMessage().reply("Debug Message Log on.");
                                     } else {
-                                        mc.getMessage().reply("You are not on the debug whitelist.");
+                                        Respond.replyNoPing(mc,"You are not on the debug whitelist.");
                                     }
                                     break;
                                 case "off":
@@ -457,7 +480,7 @@ public class MiatMain {
                                         debugmessagelog = false;
                                         mc.getMessage().reply("Debug Message Log off.");
                                     } else {
-                                        mc.getMessage().reply("You are not on the debug whitelist.");
+                                        Respond.replyNoPing(mc,"You are not on the debug whitelist.");
                                     }
                                     break;
                             }
@@ -491,7 +514,7 @@ public class MiatMain {
                                 aiThread.start();
                                 break;
                             } else {
-                                mc.getChannel().sendMessage("Invalid character - ``" + invalidCharacterName + "``.");
+                                Respond.replyNoPing(mc,"Invalid character - ``" + invalidCharacterName + "``.");
                             }
                         }
                 }
@@ -526,7 +549,7 @@ public class MiatMain {
                                     });
                                     aiThread.start();
                                 } else {
-                                    mc.getChannel().sendMessage("Invalid character - ``" + invalidCharacterName +"``.");
+                                    Respond.replyNoPing(mc,"Invalid character - ``" + invalidCharacterName +"``.");
                                 }
                             }
                         }
@@ -574,8 +597,7 @@ public class MiatMain {
                    e.addField("\u200b", "'" + md.getMessageContent().get() + "' \n\n - " + time + "\n" + "Deleted in : " + md.getChannel().toString());
                    logChannel.asServerTextChannel().get().sendMessage(e);
                 }
-            } catch (NoSuchElementException ignored) {
-            }
+            } catch (NoSuchElementException ignored) {}
         });
 
         api.addServerJoinListener(botJoin -> {
@@ -597,7 +619,6 @@ public class MiatMain {
         });
 
         api.addReactionAddListener(ra -> {
-            //disallow the reply messages of emoji translations to ping people.
             /*
             Note to self, this code is what sends the translated text while also replying to the original untranslated message without pinging
             new MessageBuilder().setAllowedMentions(noReplyPing).setEmbed(Trnsl.trnsl(translator, messageContent, targetLang)).replyTo(ra.requestMessage().join()).send(ra.requestMessage().join().getChannel())
@@ -606,9 +627,7 @@ public class MiatMain {
             */
             String emoji = ra.getEmoji().asUnicodeEmoji().orElse("");
             String allEmoji = ra.requestMessage().join().getReactions().toString();
-
             String messageContent = ra.requestMessage().join().getContent();
-
             String deleteCandidate = ra.requestMessage().join().getAuthor().getIdAsString();
 
             Language targetLang;
@@ -617,10 +636,14 @@ public class MiatMain {
             switch(emoji) {
                 case "❌":
                     if (deleteCandidate.equals(self.getIdAsString())) { //self delete when X emoji is seen
-                        if (ra.requestMessage().join().getEmbeds().get(0).getTitle().get().startsWith("Translated Text")) { //only delete if it is a translation message
-                            String del = ra.requestMessage().join().getIdAsString();
-                            api.getMessageById(del, ra.getChannel()).join().delete();
+                        if (messageContent.contains("__**Racial slurs are discouraged!**__")) {
+                            api.getMessageById(ra.getMessageId(),ra.getChannel()).join().delete();
                         }
+                        try {
+                            if (ra.requestMessage().join().getEmbeds().get(0).getTitle().get().startsWith("Translated Text")) { //only delete if it is a translation message
+                                api.getMessageById(ra.getMessageId(), ra.getChannel()).join().delete();
+                            }
+                        } catch (IndexOutOfBoundsException ignored) {}
                     }
                     return;
 

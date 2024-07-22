@@ -6,7 +6,7 @@ import org.javacord.api.interaction.SlashCommandInteraction;
 import org.json.JSONObject;
 
 public class AddCharacter {
-    public static String add(SlashCommandInteraction interaction, String characterList) {
+    public static String add(SlashCommandInteraction interaction) {
         String name = interaction.getArgumentStringValueByName("name").get();
         String description = interaction.getArgumentStringValueByName("description").get();
         boolean kfChar = interaction.getArgumentBooleanValueByName("kfchar").get();
